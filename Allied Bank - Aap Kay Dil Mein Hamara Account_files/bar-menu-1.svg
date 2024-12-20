@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="Component_43_1" data-name="Component 43 – 1" width="30" height="30" viewBox="0 0 30 30">
+  <g id="Rectangle_139" data-name="Rectangle 139" fill="#fff" stroke="#f36f21" stroke-width="0.5">
+    <rect width="30" height="30" rx="5" stroke="none"></rect>
+    <rect x="0.25" y="0.25" width="29.5" height="29.5" rx="4.75" fill="none"></rect>
+  </g>
+  <g id="Group_1111" data-name="Group 1111" transform="translate(-282.5 -57.5)">
+    <line id="Line_34" data-name="Line 34" x2="14" transform="translate(290.5 66.5)" fill="none" stroke="#f36f21" stroke-linecap="round" stroke-width="3"></line>
+    <line id="Line_35" data-name="Line 35" x2="12" transform="translate(290.5 72.5)" fill="none" stroke="#f36f21" stroke-linecap="round" stroke-width="3"></line>
+    <line id="Line_36" data-name="Line 36" x2="10" transform="translate(290.5 78.5)" fill="none" stroke="#f36f21" stroke-linecap="round" stroke-width="3"></line>
+  </g>
+</svg>
