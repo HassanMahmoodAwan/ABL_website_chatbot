@@ -395,7 +395,7 @@ window.onload = ()=>{
             msgContainer.appendChild(newMessage);
             autoScroll()
         }
-        inputValue = "";
+        
 
         let ch = [];
         ch.push("user", inputValue);
@@ -414,6 +414,7 @@ window.onload = ()=>{
 
             let apiUrl = "http://192.168.2.5:8000/question/stream";
             getChatbotResponse(apiUrl, inputData)
+            inputValue = "";
         }
 
     }
@@ -528,7 +529,8 @@ window.onload = ()=>{
     
             if (!response.body) {
                 throw new Error("Readable stream not supported in this environment.");
-                abl_icon_msg.textContent = "stop_circle"
+                abl_icon_msg.classList.add("fa-stop")
+                abl_icon_msg.classList.remove("fa-arrow-up")
 
             }
             const reader = response.body.getReader();
@@ -543,7 +545,8 @@ window.onload = ()=>{
                 done = readerDone;
                 outputDiv.style.display = "flex";
                 if(done){
-                    abl_icon_msg.textContent = "send"
+                    abl_icon_msg.classList.remove("fa-stop")
+                    abl_icon_msg.classList.add("fa-arrow-up")
                     streaming = false;
                     inputValue = "";
                 }
