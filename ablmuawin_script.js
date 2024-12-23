@@ -16,7 +16,9 @@ window.onload = ()=>{
     // ========== Widget Start Theme =============
     let widgetStartTemplate = document.getElementById("ABLMuawin_startTemplate")
     const inputField_startTemplate = document.getElementById("InputMessage_startTemplate")
+    let inputField_container = document.getElementById("startTemplate_inputField")
     let sugQuestionsElement = document.getElementById("suggestedQuestions")
+    let msg_sending_btn = document.getElementById("msg_sending_btn")
     
     
     // ========= Widget Main Template ============
@@ -24,9 +26,8 @@ window.onload = ()=>{
     msgContainer = document.getElementById('ABLMuawin_body');
     abl_icon_msg = document.getElementById("icon_msg")
     const refresh_btn = document.getElementById("AblMuawin_refresh")
-
-
-
+    
+    
     // ========= Other Selectors ============
 
 
@@ -112,29 +113,55 @@ window.onload = ()=>{
             "security": [", How to secure my account?", ", How to secure my account from fraud?", ", How to secure my account from hacking?"],
             "finances": [", How to apply for loan?", ", How to apply for credit card?", ", How to apply for debit card?"],
         }
+       
 
         inputField_startTemplate.addEventListener("input", (event)=>{
             inputValue = event.target.value;
-            console.log(suggestedQuestions.keys)
-            if (inputValue in suggestedQuestions.keys){
+            passingValue = inputValue.toLowerCase()
+            console.log(passingValue)
+            if (Object.keys(suggestedQuestions).includes(passingValue)){
                 sugGroupList.style.display =  "none"
                 sugQuestionsElement.style.display = "flex"
+                
+                questions = suggestedQuestions[passingValue]
                 questions.forEach((question)=>{
+                console.log(question)
                 divElement =  document.createElement('div')
                 divElement.className = "suggestedQuestion"
-                divElement.innerHTML = `<span style="font-weight:bold;">${msgText}</span{question}`
+                divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
                 sugQuestionsElement.appendChild(divElement)
             })
-            }
-            if (event.target.value == ""){
+            }else {
+                sugQuestionsElement.innerHTML = ""
                 sugGroupList.style.display =  "flex"
                 sugQuestionsElement.style.display = "none"
-            
             }
+            // if (event.target.value == "" || event.target.value == " "){
+            //     sugGroupList.style.display =  "flex"
+            //     sugQuestionsElement.style.display = "none"
+            
+            // }
+            // if (!Object.keys(suggestedQuestions).includes(event.target.value)){
+            //     console.log("change")
+            //     sugGroupList.style.display = "flex";
+            //     sugQuestionsElement.style.display = "none";
+            // }
         })
         inputField_startTemplate.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') { 
-                inputField_startTemplate.value = " "
+                inputField_startTemplate.value = null
+                
+                widgetStartTemplate.style.display = "none"
+                widget_mainTemplate.style.display = "block"
+                refresh_btn.style.display = "block"
+
+                onSendingMsg()
+    
+            }
+        });
+        msg_sending_btn.addEventListener('click', function(event) {
+            if (inputField_startTemplate.value) { 
+                inputField_startTemplate.value = null
                 
                 widgetStartTemplate.style.display = "none"
                 widget_mainTemplate.style.display = "block"
@@ -150,10 +177,8 @@ window.onload = ()=>{
             element.addEventListener("click", ()=>{
                 msgText = element.textContent.trim()
                 inputField_startTemplate.value = msgText
-                
-                
+
                 questions = suggestedQuestions[msgText.toLowerCase()]
-                console.log(questions)
                 if (questions){
                     sugGroupList.style.display =  "none"
                     sugQuestionsElement.style.display = "flex"
@@ -169,29 +194,25 @@ window.onload = ()=>{
                         singleSuggestion.addEventListener("click", ()=>{
                             let msgText = singleSuggestion.textContent.trim()
 
-                            inputField_startTemplate.value = " "
+                            inputField_startTemplate.value = null
                             inputValue = msgText
                             widgetStartTemplate.style.display = "none"
                             widget_mainTemplate.style.display = "block"
                             refresh_btn.style.display = "block"
 
+                            sugGroupList.style.display =  "flex"
+                            sugQuestionsElement.style.display = "none"
+
                             onSendingMsg()
-
-
-
+                            sugQuestionsElement.innerHTML = ""
                         })
                     })
-
                 }
                 else{
                     "No Questions Found"
-                }
-                
-            })
-            
-        
-        })
-        
+                }               
+            })            
+        })       
     // ===============================================================
 
     // *********** Widget Expand and Compress ***************
@@ -203,6 +224,7 @@ window.onload = ()=>{
         if (ablMuawin_expand_compress.className == "fa-regular fa-square"){
             ablmuawin_widget.style.height = "84%";
             ablmuawin_widget.style.width = "96%";
+            inputField_container.style.width = "54%";
             msgContainer.style.fontSize = "medium";
             ablMuawin_expand_compress.className = "fa-regular fa-window-restore"
 
@@ -213,7 +235,8 @@ window.onload = ()=>{
 
         }else{
             ablmuawin_widget.style.height = "79.2%";
-            ablmuawin_widget.style.width = "33%";
+            inputField_container.style.width = "89%";
+            ablmuawin_widget.style.width = "500px";
             msgContainer.style.fontSize = "17px";
             ablMuawin_expand_compress.className = "fa-regular fa-square"
 
@@ -241,33 +264,6 @@ window.onload = ()=>{
     })
     
 
-    // *************** Resizeable Script ************
-    // let isResizing = false;
-    // let startX, startWidth, startLeft;
-
-    // resizableDiv = ablmuawin_widget
-    // resizableDiv.addEventListener('mousedown', (e) => {
-    //   isResizing = true;
-    //   startX = e.clientX;
-    //   startWidth = parseInt(window.getComputedStyle(resizableDiv).width, 10);
-    //   startLeft = parseInt(window.getComputedStyle(resizableDiv).left, 10);
-    //   document.body.style.cursor = 'ew-resize'; // Change cursor during resizing
-    // });
-
-    // document.addEventListener('mousemove', (e) => {
-    //   if (!isResizing) return;
-    //   const dx = startX - e.clientX;
-    //   resizableDiv.style.width = `${startWidth + dx}px`;
-    //   resizableDiv.style.left = `${startLeft - dx}px`;
-    // });
-
-    // document.addEventListener('mouseup', () => {
-    //   if (isResizing) {
-    //     isResizing = false;
-    //     document.body.style.cursor = ''; 
-    //   }
-    // });
-    // *********************************************8
     
     // =========== ABL Muawin Refresh Chats ==========
     refresh_btn.addEventListener('click', () => {
@@ -281,6 +277,10 @@ window.onload = ()=>{
         if (currentDiv) {
           parentDiv.appendChild(currentDiv);
         }
+        widgetStartTemplate.style.display = "flex"
+        widget_mainTemplate.style.display = "none"
+        refresh_btn.style.display = "none"
+
       });
     // ===============================================
     
@@ -374,7 +374,7 @@ window.onload = ()=>{
         if (inputValue == ""){
             return
         }
-        inputField.value = ""
+        inputField.value = null;
         abl_icon_msg.classList.remove("fa-arrow-up")
         abl_icon_msg.classList.add("fa-stop")
         // chatHistory["userInput"] = inputValue
@@ -395,6 +395,7 @@ window.onload = ()=>{
             msgContainer.appendChild(newMessage);
             autoScroll()
         }
+        inputValue = "";
 
         let ch = [];
         ch.push("user", inputValue);
@@ -411,15 +412,11 @@ window.onload = ()=>{
                 "kwargs": {}
             };
 
-            let apiUrl = "http://192.168.2.15:8000/question/stream";
+            let apiUrl = "http://192.168.2.5:8000/question/stream";
             getChatbotResponse(apiUrl, inputData)
         }
 
     }
-
-
-
-
 
 
 
@@ -444,6 +441,23 @@ window.onload = ()=>{
         const messageElement = document.createElement("div");
         const textElement = document.createElement("div");
         textElement.className = 'ABLMuawin_responseMsg';
+        textElement.style.display = "none";
+    
+        messageElement.appendChild(textElement);
+    
+        chatContainer.appendChild(messageElement);
+    
+        // Scroll to the bottom of the chat container
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        return textElement;
+    }
+
+    function appendErrorMessage(sender, message) {
+        const chatContainer = document.getElementById("ABLMuawin_body");
+        const messageElement = document.createElement("div");
+        const textElement = document.createElement("div");
+        textElement.className = 'ABLMuawin_errorMsg';
+        textElement.style.display = "none";
     
         messageElement.appendChild(textElement);
     
@@ -461,7 +475,7 @@ window.onload = ()=>{
         scrollingContainer.style.scrollBehavior = 'smooth';
         // Scroll down automatically
         scrollingContainer.scrollTop = scrollingContainer.scrollHeight;
-    }
+    } 
 
     function handleStreamedData(text, outputDiv) {
         const events = text.split("\r\n");
@@ -527,6 +541,7 @@ window.onload = ()=>{
                 //console.log(done);
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
+                outputDiv.style.display = "flex";
                 if(done){
                     abl_icon_msg.textContent = "send"
                     streaming = false;
@@ -538,6 +553,12 @@ window.onload = ()=>{
                 }
             }
         } catch (error) {
+            abl_icon_msg.textContent = "send"
+            streaming = false;
+            inputValue = "";
+            outputDiv = appendErrorMessage();
+            outputDiv.style.display = "flex";
+            outputDiv.innerHTML = "Error: "+ error; 
             console.error('Error:', error);
         }
     }

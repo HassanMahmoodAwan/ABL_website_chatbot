@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Wait Dots (Wave + Fade Animation)</title>
+  <style>
+    /* Style for the chatbot message container */
+    .chatbot-message {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      color: #333;
+      display: inline-flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: #f1f1f1;
+      width: fit-content;
+      max-width: 300px;
+      margin: 10px;
+    }
+
+    /* Wait dots container */
+    .wait-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    /* Individual dots */
+    .dot {
+      width: 8px;
+      height: 8px;
+      background-color: #333;
+      border-radius: 50%;
+      animation: wave-fade 1s infinite ease-in-out;
+    }
+
+    /* Animation delay for each dot */
+    .dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    .dot:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    .dot:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    /* Keyframes for the wave and fade animation */
+    @keyframes wave-fade {
+      0%, 100% {
+        transform: translateY(0);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translateY(-10px);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Chatbot message with wave-like and fading wait dots -->
+  <div class="chatbot-message">
+    <span class="wait-dots">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </span>
+  </div>
+
+  <script>
+    // Example: Hide the wait dots after 5 seconds
+    setTimeout(() => {
+      document.querySelector('.chatbot-message').style.display = 'none';
+    }, 10000);
+  </script>
+</body>
+</html>
