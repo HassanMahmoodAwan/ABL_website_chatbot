@@ -33,7 +33,6 @@ window.onload = ()=>{
 
 
     // ===**************** Authentication Widget ******************===
-
     
     nameInput_authentication=""
     cnicInput_authentication=""
@@ -46,7 +45,6 @@ window.onload = ()=>{
         cnic_error_msg.style.visibility = "hidden"
         cnicInput_authentication = event.target.value;
     })
-    console.log(nameInput_authentication)
 
 
     ablmuawin_open.addEventListener("click", ()=>{
@@ -58,19 +56,16 @@ window.onload = ()=>{
             }
             else{
                 ablMuawin_authentication_widget.style.visibility = "visible";}
-            console.log("CHeck")
         }
         ablMuawin_authentication_widget.className = "show"
-
     })
+
     ablmuawin_authentication_widget_close.addEventListener("click", ()=>{
         ablMuawin_authentication_widget.className = "";
-
     })
 
     ablmuawin_widget_open.addEventListener('click', ()=>{
-        
-        
+              
         if (!nameInput_authentication){
             name_error_msg.style.visibility = "visible"
             return
@@ -81,10 +76,7 @@ window.onload = ()=>{
 
         nameValidationRegex =  /[!@#$%^&*(),.?":{}|<>-]/;
         cnicValidationRegex =  /^[0-9]+$/;
-        console.log(cnicTag_authentication.value.trim().length != 13)
-        console.log(!cnicValidationRegex.test(parseInt(cnicTag_authentication.value.trim())))
-        console.log(nameValidationRegex.test(cnicTag_authentication.value))
-        console.log(typeof parseInt(cnicTag_authentication.value))
+
         if (nameValidationRegex.test(nameTag_authentication.value)){
             name_error_msg.style.visibility = "visible";
             return
@@ -92,8 +84,7 @@ window.onload = ()=>{
             cnic_error_msg.style.visibility = "visible";
             return
         }
-
-
+        
         ablmuawin_authentication_widget.style.visibility = "hidden"
         ablMuawin_authentication_widget.className = "";
         ablmuawin_widget.style.display = "flex";
@@ -412,7 +403,7 @@ window.onload = ()=>{
                 "kwargs": {}
             };
 
-            let apiUrl = "http://192.168.2.5:8000/question/stream";
+            let apiUrl = "http://localhost:8000/question/stream";
             getChatbotResponse(apiUrl, inputData)
             inputValue = "";
         }
@@ -440,9 +431,21 @@ window.onload = ()=>{
     function appendStreamMessage(sender, message) {
         const chatContainer = document.getElementById("ABLMuawin_body");
         const messageElement = document.createElement("div");
+        messageElement.style.width = "100%"
+        messageElement.style.display = "flex"
+        messageElement.style.justifyContent = "start"
         const textElement = document.createElement("div");
         textElement.className = 'ABLMuawin_responseMsg';
-        textElement.style.display = "none";
+        // textElement.style.display = "none";
+        textElement.innerHTML = `
+        <div class="chatbot-message">
+            <span class="wait-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </span>
+        </div>
+        `;
     
         messageElement.appendChild(textElement);
     
@@ -456,9 +459,20 @@ window.onload = ()=>{
     function appendErrorMessage(sender, message) {
         const chatContainer = document.getElementById("ABLMuawin_body");
         const messageElement = document.createElement("div");
+        messageElement.style.width = "100%"
+        messageElement.style.display = "flex"
+        messageElement.style.justifyContent = "start"
         const textElement = document.createElement("div");
         textElement.className = 'ABLMuawin_errorMsg';
-        textElement.style.display = "none";
+        textElement.innerHTML = `
+        <div class="chatbot-message">
+            <span class="wait-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </span>
+        </div>
+        `;
     
         messageElement.appendChild(textElement);
     
@@ -514,6 +528,7 @@ window.onload = ()=>{
     let streaming = false;
 
     async function getChatbotResponse(apiUrl, userInput) {
+        let outputDiv = null
         try {
             //appendMessage('user', userInput["input"]["question"]);
             //console.log(userInput);
@@ -539,11 +554,16 @@ window.onload = ()=>{
                 let done = false;
             outputDiv = appendStreamMessage();
             streaming = true;
+            counter = 0;
             while(streaming){
                 //console.log(done);
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
-                outputDiv.style.display = "flex";
+                // outputDiv.style.display = "flex";
+                if (counter == 0){
+                    outputDiv.innerHTML = null;
+                    counter +=1
+                }
                 if(done){
                     abl_icon_msg.classList.remove("fa-stop")
                     abl_icon_msg.classList.add("fa-arrow-up")
@@ -556,12 +576,14 @@ window.onload = ()=>{
                 }
             }
         } catch (error) {
-            abl_icon_msg.textContent = "send"
+            outputDiv.style.display = "none"
+            abl_icon_msg.classList.remove("fa-stop")
+            abl_icon_msg.classList.add("fa-arrow-up")
             streaming = false;
             inputValue = "";
-            outputDiv = appendErrorMessage();
-            outputDiv.style.display = "flex";
-            outputDiv.innerHTML = "Error: "+ error; 
+            errorDiv = appendErrorMessage();
+            errorDiv.style.display = "flex";
+            errorDiv.innerHTML = "Error: "+ error; 
             console.error('Error:', error);
         }
     }
