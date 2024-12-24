@@ -1,4 +1,34 @@
 window.onload = ()=>{
+    let suggestion_data;
+    let sugGroupList = document.getElementById("suggestionsGroupList")
+    async function getSuggestionGroups() {
+        const url = "http://localhost:8000/api/get_alldata";
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+      
+          suggestion_data = await response.json();
+          console.log(suggestion_data);
+          console.log(suggestion_data[0].icon_theme)
+          suggestion_data.forEach((each)=>{
+                divElement =  document.createElement('div')
+                divElement.className = "suggestion_group"
+                divElement.innerHTML = `
+						<i class=${each.icon_theme} style="color: ${each.color_theme};"></i>
+						${each.category_name} -->`
+                sugGroupList.appendChild(divElement)
+          })
+        } catch (error) {
+          console.error(error.message);
+        }
+    }
+    getSuggestionGroups()
+    
+    
+
+
     
     ablmuawin_widget = document.getElementById("ABLMuawin_widget")
 
@@ -140,7 +170,7 @@ window.onload = ()=>{
     
             }
         });
-        
+
         msg_sending_btn.addEventListener('click', function(event) {
             if (inputField_startTemplate.value) { 
                 inputField_startTemplate.value = null
@@ -154,7 +184,7 @@ window.onload = ()=>{
             }
         });
         
-        let sugGroupList = document.getElementById("suggestionsGroupList")
+        
         document.querySelectorAll(".suggestion_group").forEach((element)=>{
             element.addEventListener("click", ()=>{
                 msgText = element.textContent.trim()
