@@ -127,16 +127,6 @@ window.onload = ()=>{
                 sugGroupList.style.display =  "flex"
                 sugQuestionsElement.style.display = "none"
             }
-            // if (event.target.value == "" || event.target.value == " "){
-            //     sugGroupList.style.display =  "flex"
-            //     sugQuestionsElement.style.display = "none"
-            
-            // }
-            // if (!Object.keys(suggestedQuestions).includes(event.target.value)){
-            //     console.log("change")
-            //     sugGroupList.style.display = "flex";
-            //     sugQuestionsElement.style.display = "none";
-            // }
         })
         inputField_startTemplate.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') { 
@@ -150,6 +140,7 @@ window.onload = ()=>{
     
             }
         });
+        
         msg_sending_btn.addEventListener('click', function(event) {
             if (inputField_startTemplate.value) { 
                 inputField_startTemplate.value = null
