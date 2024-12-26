@@ -35,7 +35,7 @@ def main(db: db_dependency, category_name: str, icon_theme, color_theme,  questi
     
     print("\nStoring results in Database \n")
     db_analysis = models.AblMuawin_dataCollection_Table(
-        category_name = category_name,
+        category_name = category_name.lower(),
         icon_theme = icon_theme,
         color_theme = color_theme,
         questions = questions  
@@ -55,8 +55,7 @@ async def get_all_records(db: db_dependency):
     db_table = models.AblMuawin_dataCollection_Table
     try:
         data = db.query(db_table).all()
-        print(data)
-        print(type(data))
+        # data["category_name"] = data["category_name"].capitalize()
         return data
     except Exception as e:
         return {"status": "Error Fetching Data (404)", "message": str(e)}
@@ -77,3 +76,111 @@ async def delete_record(category_name:str, db: db_dependency):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+    
+
+
+# ======== ABL ChatHistory Endpoints ==========
+
+
+
+# @app.post("/api/add_chathistory")
+# def add_chathistory(userName: str, user_cnic: int, chat_history: list[dict], db: db_dependency):
+#     new_record = models.ABLMuawin_Authentication_Table(
+#         userName=userName,
+#         user_cnic=user_cnic,
+#         chat_history=chat_history
+#     )
+#     db.add(new_record)
+#     db.commit()
+#     db.refresh(new_record)
+    
+#     return {
+#         "status": "commited in DB",
+#         "message": "Record added successfully",
+#         "id": new_record.id,
+#         "data": new_record
+#     }
+@app.post("/api/add_chathistory")
+def add_chathistory(data:dict, db: db_dependency):
+    
+    userName = data.get("userName")
+    user_cnic = data.get("user_cnic")
+    chat_history = data.get("chat_history")
+    
+    new_record = models.ABLMuawin_Authentication_Table(
+        userName=userName,
+        user_cnic=user_cnic,
+        chat_history=chat_history
+    )
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    
+    return {
+        "status": "commited in DB",
+        "message": "Record added successfully",
+        "id": new_record.id,
+        "data": new_record
+    }
+
+
+
+@app.patch("/api/update_chathistory")
+async def update_chathistory(id: int, userName: str, user_cnic: int, new_entry: dict, db: db_dependency):
+    try:
+        # Query the record by id, userName, and user_cnic
+        record = db.query(models.ABLMuawin_Authentication_Table).filter(
+            models.ABLMuawin_Authentication_Table.id == id,
+            models.ABLMuawin_Authentication_Table.userName == userName,
+            models.ABLMuawin_Authentication_Table.user_cnic == user_cnic
+        ).first()
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="Record not found")
+        
+        print(record.chat_history)
+        print(new_entry)
+        # Append new entry to chat_history
+        if record.chat_history  == [{}]:
+            print("check None")
+            record.chat_history = [new_entry]
+        else:
+            print("Its working")
+            record.chat_history.append(new_entry)
+        
+        db.commit()
+        # db.refresh(record)
+        
+        return {"status": "success", "message": "Chat history updated successfully", "data": record.chat_history}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@app.get("/api/get_allchathistory")
+async def get_all_records(db: db_dependency):
+    try:
+        data = db.query(models.ABLMuawin_Authentication_Table).all()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    
+@app.delete("/api/delete_chathistory")
+async def delete_record(record_id:int, db: db_dependency):
+    db_table = models.ABLMuawin_Authentication_Table
+    try:
+        data = db.query(db_table).filter(db_table.id == record_id).first()
+        if not data:
+            raise HTTPException(status_code=404, detail="Record not found")
+        
+        db.delete(data)
+        db.commit()
+        return {"status": "success", "message": "Data deleted successfully"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    

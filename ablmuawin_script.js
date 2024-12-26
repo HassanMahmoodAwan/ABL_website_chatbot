@@ -1,33 +1,86 @@
 window.onload = ()=>{
     let suggestion_data;
-    let sugGroupList = document.getElementById("suggestionsGroupList")
-    async function getSuggestionGroups() {
-        const url = "http://localhost:8000/api/get_alldata";
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-          }
-      
-          suggestion_data = await response.json();
-          console.log(suggestion_data);
-          console.log(suggestion_data[0].icon_theme)
-          suggestion_data.forEach((each)=>{
-                divElement =  document.createElement('div')
-                divElement.className = "suggestion_group"
-                divElement.innerHTML = `
-						<i class=${each.icon_theme} style="color: ${each.color_theme};"></i>
-						${each.category_name} -->`
-                sugGroupList.appendChild(divElement)
-          })
-        } catch (error) {
-          console.error(error.message);
-        }
-    }
-    getSuggestionGroups()
-    
-    
+    let chat_id;
+    const suggestedQuestions = {}
 
+    // const suggestedQuestions = {
+    //     "products info": [", does it offer online shopping?", " does it provide Virtual Debit Card?", ", What features it offers?", ", How to get out Account Statement."],
+    //     "branch/atm details": [", How to find nearest branch?", ", How to find nearest ATM?", ", How to find nearest Cash Deposit Machine?"],
+    //     "discounts": [", How to avail discounts?", ", How to avail discounts on Debit Card?", ", How to avail discounts on Credit Card?"],
+    //     "security": [", How to secure my account?", ", How to secure my account from fraud?", ", How to secure my account from hacking?"],
+    //     "finances": [", How to apply for loan?", ", How to apply for credit card?", ", How to apply for debit card?"],
+    // }
+
+
+
+    let sugGroupList = document.getElementById("suggestionsGroupList")
+    async function getSuggestionGroupsEarly() {
+        let group_url = "http://localhost:7000/api/get_alldata";
+        try {
+            response = await fetch(group_url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            suggestion_data = await response.json();
+            suggestion_data.forEach((each) => {
+                suggestedQuestions[each.category_name.toLowerCase()] = each.questions;
+
+                // Create suggested group
+                const divElement = document.createElement('div');
+                divElement.className = "suggestion_group";
+                divElement.innerHTML = `
+                    <i class="${each.icon_theme}" style="color: ${each.color_theme};"></i>
+                    ${each.category_name}`;
+                sugGroupList.appendChild(divElement);
+    
+                // Attach click event listener to the group
+                divElement.addEventListener("click", () => {
+                    const msgText = each.category_name.trim();
+                    inputField_startTemplate.value = msgText;
+                    inputField_startTemplate.focus();
+    
+                    const questions = suggestedQuestions[msgText.toLowerCase()];
+                    if (questions) {
+                        sugGroupList.style.display = "none";
+                        sugQuestionsElement.style.display = "flex";
+    
+                        sugQuestionsElement.innerHTML = ""; // Clear old suggestions
+                        questions.forEach((question) => {
+                            const questionDiv = document.createElement('div');
+                            questionDiv.className = "suggestedQuestion";
+                            questionDiv.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`;
+                            sugQuestionsElement.appendChild(questionDiv);
+    
+                            // Question Click handler
+                            questionDiv.addEventListener("click", () => {
+                                const msgText = questionDiv.textContent.trim();
+    
+                                inputField_startTemplate.value = null;
+                                inputValue = msgText
+                                widgetStartTemplate.style.display = "none";
+                                widget_mainTemplate.style.display = "block";
+                                refresh_btn.style.display = "block";
+    
+                                sugGroupList.style.display = "flex";
+                                sugQuestionsElement.style.display = "none";
+                                sugQuestionsElement.innerHTML = ""; // Clear after sending
+    
+                                onSendingMsg();
+                            });
+                        });
+                    } else {
+                        console.log("No Questions Found");
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error.message);
+        }
+    } 
+    getSuggestionGroupsEarly()   
+    
+    
 
     
     ablmuawin_widget = document.getElementById("ABLMuawin_widget")
@@ -45,21 +98,19 @@ window.onload = ()=>{
     
     // ========== Widget Start Theme =============
     let widgetStartTemplate = document.getElementById("ABLMuawin_startTemplate")
-    const inputField_startTemplate = document.getElementById("InputMessage_startTemplate")
+    let inputField_startTemplate = document.getElementById("InputMessage_startTemplate")
     let inputField_container = document.getElementById("startTemplate_inputField")
     let sugQuestionsElement = document.getElementById("suggestedQuestions")
     let msg_sending_btn = document.getElementById("msg_sending_btn")
     
     
     // ========= Widget Main Template ============
-    widget_mainTemplate = document.getElementById("ABLMuawin_mainTemplate")
-    msgContainer = document.getElementById('ABLMuawin_body');
-    abl_icon_msg = document.getElementById("icon_msg")
-    const refresh_btn = document.getElementById("AblMuawin_refresh")
+    let widget_mainTemplate = document.getElementById("ABLMuawin_mainTemplate")
+    let msgContainer = document.getElementById('ABLMuawin_body');
+    let abl_icon_msg = document.getElementById("icon_msg")
+    let refresh_btn = document.getElementById("AblMuawin_refresh")
     
     
-    // ========= Other Selectors ============
-
 
 
     // ===**************** Authentication Widget ******************===
@@ -77,7 +128,9 @@ window.onload = ()=>{
     })
 
 
+    // SIDE-BTN Click Handler
     ablmuawin_open.addEventListener("click", ()=>{
+        
         if (ablmuawin_widget.style.display == "none"){
             if (nameInput_authentication != "" && cnicInput_authentication != ""){
                 ablmuawin_authentication_widget.style.visibility = "hidden"
@@ -90,12 +143,13 @@ window.onload = ()=>{
         ablMuawin_authentication_widget.className = "show"
     })
 
+    // CLOSE-BTN click Handler
     ablmuawin_authentication_widget_close.addEventListener("click", ()=>{
         ablMuawin_authentication_widget.className = "";
     })
 
-    ablmuawin_widget_open.addEventListener('click', ()=>{
-              
+    // START-CHAT Click Handler
+    ablmuawin_widget_open.addEventListener('click', ()=>{       
         if (!nameInput_authentication){
             name_error_msg.style.visibility = "visible"
             return
@@ -114,7 +168,40 @@ window.onload = ()=>{
             cnic_error_msg.style.visibility = "visible";
             return
         }
-        
+
+        const postAuthenicationData = async () => {
+            posturl = "http://localhost:7000/api/add_chathistory";
+            let data = {
+              userName: nameInput_authentication,
+              user_cnic: cnicInput_authentication,
+              chat_history: [
+                {}
+              ]
+            };
+          
+            try {
+              let response = await fetch(posturl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+              });
+          
+              if (!response.ok) {
+                throw new Error(`Error while processing Authentication Data with Status:  ${response.status}`);
+              }
+          
+              result = await response.json();
+              chat_id = result.id
+
+            } catch (error) {
+              console.error("Error while sending Authenication Post request:", error);
+            }
+          };
+          postAuthenicationData();
+
+                
         ablmuawin_authentication_widget.style.visibility = "hidden"
         ablMuawin_authentication_widget.className = "";
         ablmuawin_widget.style.display = "flex";
@@ -127,105 +214,99 @@ window.onload = ()=>{
 
 
     // =================== Starter Theme of ABL Muawin ===============
-        const suggestedQuestions = {
-            "products info": [", does it offer online shopping?", " does it provide Virtual Debit Card?", ", What features it offers?", ", How to get out Account Statement."],
-            "branch/atm details": [", How to find nearest branch?", ", How to find nearest ATM?", ", How to find nearest Cash Deposit Machine?"],
-            "discounts": [", How to avail discounts?", ", How to avail discounts on Debit Card?", ", How to avail discounts on Credit Card?"],
-            "security": [", How to secure my account?", ", How to secure my account from fraud?", ", How to secure my account from hacking?"],
-            "finances": [", How to apply for loan?", ", How to apply for credit card?", ", How to apply for debit card?"],
-        }
-       
 
-        inputField_startTemplate.addEventListener("input", (event)=>{
-            inputValue = event.target.value;
-            passingValue = inputValue.toLowerCase()
-            console.log(passingValue)
-            if (Object.keys(suggestedQuestions).includes(passingValue)){
-                sugGroupList.style.display =  "none"
-                sugQuestionsElement.style.display = "flex"
-                
-                questions = suggestedQuestions[passingValue]
-                questions.forEach((question)=>{
-                console.log(question)
-                divElement =  document.createElement('div')
-                divElement.className = "suggestedQuestion"
-                divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
-                sugQuestionsElement.appendChild(divElement)
-            })
-            }else {
-                sugQuestionsElement.innerHTML = ""
-                sugGroupList.style.display =  "flex"
-                sugQuestionsElement.style.display = "none"
-            }
+    inputField_startTemplate.addEventListener("input", (event)=>{
+        inputValue = event.target.value;
+        passingValue = inputValue.toLowerCase()
+        console.log(passingValue)
+        if (Object.keys(suggestedQuestions).includes(passingValue)){
+            sugGroupList.style.display =  "none"
+            sugQuestionsElement.style.display = "flex"
+            
+            questions = suggestedQuestions[passingValue]
+            questions.forEach((question)=>{
+            console.log(question)
+            divElement =  document.createElement('div')
+            divElement.className = "suggestedQuestion"
+            divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
+            sugQuestionsElement.appendChild(divElement)
         })
-        inputField_startTemplate.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') { 
-                inputField_startTemplate.value = null
-                
-                widgetStartTemplate.style.display = "none"
-                widget_mainTemplate.style.display = "block"
-                refresh_btn.style.display = "block"
+        }else {
+            sugQuestionsElement.innerHTML = ""
+            sugGroupList.style.display =  "flex"
+            sugQuestionsElement.style.display = "none"
+        }
+    })
+    inputField_startTemplate.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') { 
+            inputField_startTemplate.value = null
+            
+            widgetStartTemplate.style.display = "none"
+            widget_mainTemplate.style.display = "block"
+            refresh_btn.style.display = "block"
 
-                onSendingMsg()
+            onSendingMsg()
     
-            }
-        });
+        }
+    });
 
-        msg_sending_btn.addEventListener('click', function(event) {
-            if (inputField_startTemplate.value) { 
-                inputField_startTemplate.value = null
-                
-                widgetStartTemplate.style.display = "none"
-                widget_mainTemplate.style.display = "block"
-                refresh_btn.style.display = "block"
+    msg_sending_btn.addEventListener('click', function(event) {
+        if (inputField_startTemplate.value) { 
+            inputField_startTemplate.value = null
+            
+            widgetStartTemplate.style.display = "none"
+            widget_mainTemplate.style.display = "block"
+            refresh_btn.style.display = "block"
 
-                onSendingMsg()
+            onSendingMsg()
     
-            }
-        });
-        
-        
-        document.querySelectorAll(".suggestion_group").forEach((element)=>{
-            element.addEventListener("click", ()=>{
-                msgText = element.textContent.trim()
-                inputField_startTemplate.value = msgText
+        }
+    });
+    
+    
+    // document.querySelectorAll(".suggestion_group").forEach((element)=>{
+    //     console.log(suggestedQuestions)
+    //     element.addEventListener("click", ()=>{
+    //         msgText = element.textContent.trim()
+    //         inputField_startTemplate.value = msgText
 
-                questions = suggestedQuestions[msgText.toLowerCase()]
-                if (questions){
-                    sugGroupList.style.display =  "none"
-                    sugQuestionsElement.style.display = "flex"
-                    questions.forEach((question)=>{
-                        divElement =  document.createElement('div')
-                        divElement.className = "suggestedQuestion"
-                        divElement.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`
-                        sugQuestionsElement.appendChild(divElement)
-                    })
+    //         questions = suggestedQuestions[msgText.toLowerCase()]
+    //         if (questions){
+    //             sugGroupList.style.display =  "none"
+    //             sugQuestionsElement.style.display = "flex"
+    //             questions.forEach((question)=>{
+    //                 divElement =  document.createElement('div')
+    //                 divElement.className = "suggestedQuestion"
+    //                 divElement.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`
+    //                 sugQuestionsElement.appendChild(divElement)
+    //             })
 
-                    document.querySelectorAll(".suggestedQuestion").forEach((singleSuggestion)=>{
-                        console.log(singleSuggestion)
-                        singleSuggestion.addEventListener("click", ()=>{
-                            let msgText = singleSuggestion.textContent.trim()
+    //             document.querySelectorAll(".suggestedQuestion").forEach((singleSuggestion)=>{
+    //                 console.log(singleSuggestion)
+    //                 singleSuggestion.addEventListener("click", ()=>{
+    //                     let msgText = singleSuggestion.textContent.trim()
 
-                            inputField_startTemplate.value = null
-                            inputValue = msgText
-                            widgetStartTemplate.style.display = "none"
-                            widget_mainTemplate.style.display = "block"
-                            refresh_btn.style.display = "block"
+    //                     inputField_startTemplate.value = null
+    //                     inputValue = msgText
+    //                     widgetStartTemplate.style.display = "none"
+    //                     widget_mainTemplate.style.display = "block"
+    //                     refresh_btn.style.display = "block"
 
-                            sugGroupList.style.display =  "flex"
-                            sugQuestionsElement.style.display = "none"
+    //                     sugGroupList.style.display =  "flex"
+    //                     sugQuestionsElement.style.display = "none"
 
-                            onSendingMsg()
-                            sugQuestionsElement.innerHTML = ""
-                        })
-                    })
-                }
-                else{
-                    "No Questions Found"
-                }               
-            })            
-        })       
-    // ===============================================================
+    //                     onSendingMsg()
+    //                     sugQuestionsElement.innerHTML = ""
+    //                 })
+    //             })
+    //         }
+    //         else{
+    //             "No Questions Found"
+    //         }               
+    //     })            
+    // })       
+
+    
 
     // *********** Widget Expand and Compress ***************
     ablMuawin_expand_compress = document.getElementById("ablMuawin_Expand_Widget")
