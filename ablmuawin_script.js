@@ -1,7 +1,9 @@
 window.onload = ()=>{
     let suggestion_data;
+    const suggestedQuestions = {};
     let chat_id;
-    const suggestedQuestions = {}
+    let question;
+    let answer;
 
     // const suggestedQuestions = {
     //     "products info": [", does it offer online shopping?", " does it provide Virtual Debit Card?", ", What features it offers?", ", How to get out Account Statement."],
@@ -106,14 +108,15 @@ window.onload = ()=>{
     
     // ========= Widget Main Template ============
     let widget_mainTemplate = document.getElementById("ABLMuawin_mainTemplate")
-    let msgContainer = document.getElementById('ABLMuawin_body');
+    let msgContainer = document.getElementById('ABLMuawin_body')
+    let ablmuawin_close = document.getElementById("ablmuawin_close")
     let abl_icon_msg = document.getElementById("icon_msg")
     let refresh_btn = document.getElementById("AblMuawin_refresh")
     
     
 
 
-    // ===**************** Authentication Widget ******************===
+    // ******************* Authentication Widget *********************
     
     nameInput_authentication=""
     cnicInput_authentication=""
@@ -209,23 +212,21 @@ window.onload = ()=>{
         cnicTag_authentication.value = ""
         nameTag_authentication.value = ""
     })
-    // =================================================
+    // =================================================================
 
 
 
-    // =================== Starter Theme of ABL Muawin ===============
+    // ***************** Starter Theme of ABL Muawin *******************
 
     inputField_startTemplate.addEventListener("input", (event)=>{
         inputValue = event.target.value;
-        passingValue = inputValue.toLowerCase()
-        console.log(passingValue)
-        if (Object.keys(suggestedQuestions).includes(passingValue)){
+
+        if (Object.keys(suggestedQuestions).includes(inputValue.toLowerCase())){
             sugGroupList.style.display =  "none"
             sugQuestionsElement.style.display = "flex"
             
-            questions = suggestedQuestions[passingValue]
+            questions = suggestedQuestions[inputValue.toLowerCase()]
             questions.forEach((question)=>{
-            console.log(question)
             divElement =  document.createElement('div')
             divElement.className = "suggestedQuestion"
             divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
@@ -244,80 +245,67 @@ window.onload = ()=>{
             widgetStartTemplate.style.display = "none"
             widget_mainTemplate.style.display = "block"
             refresh_btn.style.display = "block"
-
-            onSendingMsg()
-    
+            onSendingMsg()   
         }
     });
 
-    msg_sending_btn.addEventListener('click', function(event) {
+    msg_sending_btn.addEventListener('click', function() {
         if (inputField_startTemplate.value) { 
             inputField_startTemplate.value = null
             
             widgetStartTemplate.style.display = "none"
             widget_mainTemplate.style.display = "block"
             refresh_btn.style.display = "block"
-
             onSendingMsg()
-    
         }
     });
-    
-    
-    // document.querySelectorAll(".suggestion_group").forEach((element)=>{
-    //     console.log(suggestedQuestions)
-    //     element.addEventListener("click", ()=>{
-    //         msgText = element.textContent.trim()
-    //         inputField_startTemplate.value = msgText
+    // ======================================================
 
-    //         questions = suggestedQuestions[msgText.toLowerCase()]
-    //         if (questions){
-    //             sugGroupList.style.display =  "none"
-    //             sugQuestionsElement.style.display = "flex"
-    //             questions.forEach((question)=>{
-    //                 divElement =  document.createElement('div')
-    //                 divElement.className = "suggestedQuestion"
-    //                 divElement.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`
-    //                 sugQuestionsElement.appendChild(divElement)
-    //             })
-
-    //             document.querySelectorAll(".suggestedQuestion").forEach((singleSuggestion)=>{
-    //                 console.log(singleSuggestion)
-    //                 singleSuggestion.addEventListener("click", ()=>{
-    //                     let msgText = singleSuggestion.textContent.trim()
-
-    //                     inputField_startTemplate.value = null
-    //                     inputValue = msgText
-    //                     widgetStartTemplate.style.display = "none"
-    //                     widget_mainTemplate.style.display = "block"
-    //                     refresh_btn.style.display = "block"
-
-    //                     sugGroupList.style.display =  "flex"
-    //                     sugQuestionsElement.style.display = "none"
-
-    //                     onSendingMsg()
-    //                     sugQuestionsElement.innerHTML = ""
-    //                 })
-    //             })
-    //         }
-    //         else{
-    //             "No Questions Found"
-    //         }               
-    //     })            
-    // })       
-
-    
 
     // *********** Widget Expand and Compress ***************
-    ablMuawin_expand_compress = document.getElementById("ablMuawin_Expand_Widget")
+    let ablMuawin_expand_compress = document.getElementById("ablMuawin_Expand_Widget")
+    if (window.innerWidth <= 900){
+        ablMuawin_expand_compress.style.display = "none"
+    }else{
+        ablMuawin_expand_compress.style.display = "block" 
+    }
+   
+    window.addEventListener("resize", ()=>{
+        if (window.innerWidth <= 900 && window.innerWidth >= 561){
+            ablMuawin_expand_compress.style.display = "none"
+            ablmuawin_widget.style.height = "79.2%";
+            inputField_container.style.width = "89%";
+            ablmuawin_widget.style.width = "500px";
+            msgContainer.style.fontSize = "17px";
+            ablMuawin_expand_compress.className = "fa-regular fa-square"
+        }
+        else if (window.innerWidth <= 560){
+            inputField_container.style.width = "96%";
+            sugGroupList.style.width = "92%"
+            ablmuawin_widget.style.width = "430px";
+            msgContainer.style.fontSize = "17px";
+            ablMuawin_expand_compress.className = "fa-regular fa-square"
+        }
+        else{
+            ablMuawin_expand_compress.style.display = "block"
+        }
+    })
+   
     ablMuawin_expand_compress.addEventListener("click", ()=>{
-        console.log(ablMuawin_expand_compress.className)
-         const default_messages = document.getElementsByClassName("ablMuawin_defined_message")
+
+         const default_messages = document.getElementsByClassName("ablMuawin_defined_message")  // ?
 
         if (ablMuawin_expand_compress.className == "fa-regular fa-square"){
-            ablmuawin_widget.style.height = "84%";
-            ablmuawin_widget.style.width = "96%";
-            inputField_container.style.width = "54%";
+            if (window.innerWidth < 980){
+                ablmuawin_widget.style.height = "80%";
+                ablmuawin_widget.style.width = "90%";
+                inputField_container.style.width = "80%";
+            }else{
+                ablmuawin_widget.style.height = "84%";
+                ablmuawin_widget.style.width = "96%";
+                inputField_container.style.width = "55%";
+            }
+           
             msgContainer.style.fontSize = "medium";
             ablMuawin_expand_compress.className = "fa-regular fa-window-restore"
 
@@ -343,7 +331,7 @@ window.onload = ()=>{
     // ======================================================
 
 
-    ablmuawin_close = document.getElementById("ablmuawin_close")
+    
 
     ablmuawin_close.addEventListener("click", ()=>{
         ablmuawin_widget.className = "close";

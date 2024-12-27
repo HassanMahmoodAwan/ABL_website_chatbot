@@ -126,9 +126,48 @@ def add_chathistory(data:dict, db: db_dependency):
 
 
 
+# @app.patch("/api/update_chathistory")
+# async def update_chathistory(id: int, userName: str, user_cnic: int, new_entry: dict, db: db_dependency):
+#     try:
+#         # Query the record by id, userName, and user_cnic
+#         record = db.query(models.ABLMuawin_Authentication_Table).filter(
+#             models.ABLMuawin_Authentication_Table.id == id,
+#             models.ABLMuawin_Authentication_Table.userName == userName,
+#             models.ABLMuawin_Authentication_Table.user_cnic == user_cnic
+#         ).first()
+        
+#         if not record:
+#             raise HTTPException(status_code=404, detail="Record not found")
+        
+#         print(record.chat_history)
+#         print(new_entry)
+#         # Append new entry to chat_history
+#         if record.chat_history  == [{}]:
+#             print("check None")
+#             record.chat_history = [new_entry]
+#         else:
+#             print("Its working")
+#             record.chat_history.append(new_entry)
+        
+#         db.commit()
+#         # db.refresh(record)
+        
+#         return {"status": "success", "message": "Chat history updated successfully", "data": record.chat_history}
+    
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    
 @app.patch("/api/update_chathistory")
-async def update_chathistory(id: int, userName: str, user_cnic: int, new_entry: dict, db: db_dependency):
+async def update_chathistory(data:list[dict], db: db_dependency):
     try:
+        
+        
+        id = data[0]["id"]
+        userName = data[0]["userName"]
+        user_cnic = data[0]["user_cnic"]
+        
         # Query the record by id, userName, and user_cnic
         record = db.query(models.ABLMuawin_Authentication_Table).filter(
             models.ABLMuawin_Authentication_Table.id == id,
@@ -137,17 +176,16 @@ async def update_chathistory(id: int, userName: str, user_cnic: int, new_entry: 
         ).first()
         
         if not record:
-            raise HTTPException(status_code=404, detail="Record not found")
+            raise HTTPException(status_code=404, detail="Record not found")       
         
-        print(record.chat_history)
-        print(new_entry)
+        print(record)
         # Append new entry to chat_history
         if record.chat_history  == [{}]:
-            print("check None")
-            record.chat_history = [new_entry]
+            print("new")
+            record.chat_history = [data[1]]
         else:
-            print("Its working")
-            record.chat_history.append(new_entry)
+            record.chat_history.append(data[1])
+            print("append")
         
         db.commit()
         # db.refresh(record)
@@ -156,6 +194,8 @@ async def update_chathistory(id: int, userName: str, user_cnic: int, new_entry: 
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 
 
