@@ -2,7 +2,7 @@ window.onload = ()=>{
     let suggestion_data;
     const suggestedQuestions = {};
     let chat_id;
-    let question;
+    let Question;
     let answer;
 
     // const suggestedQuestions = {
@@ -51,7 +51,8 @@ window.onload = ()=>{
                         questions.forEach((question) => {
                             const questionDiv = document.createElement('div');
                             questionDiv.className = "suggestedQuestion";
-                            questionDiv.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`;
+                            // questionDiv.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`;
+                            questionDiv.innerHTML = `${question}`;
                             sugQuestionsElement.appendChild(questionDiv);
     
                             // Question Click handler
@@ -117,7 +118,6 @@ window.onload = ()=>{
 
 
     // ******************* Authentication Widget *********************
-    
     nameInput_authentication=""
     cnicInput_authentication=""
 
@@ -455,6 +455,9 @@ window.onload = ()=>{
         if (inputValue == ""){
             return
         }
+        Question = inputValue
+        console.log(Question)
+
         inputField.value = null;
         abl_icon_msg.classList.remove("fa-arrow-up")
         abl_icon_msg.classList.add("fa-stop")
@@ -655,6 +658,41 @@ window.onload = ()=>{
                     counter +=1
                 }
                 if(done){
+
+                    Answer = outputDiv.innerHTML
+
+                    const patchChatHistoryData = async () => {
+                        posturl = "http://localhost:7000/api/update_chathistory";
+
+                        let data = [
+                            {id: chat_id, userName: nameInput_authentication, user_cnic: cnicInput_authentication}, 
+                            {question: Question, answer: Answer}
+                        ]                                             
+                      
+                        try {
+                          let response = await fetch(posturl, {
+                            method: "PATCH",
+                            headers: {
+                              "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(data)
+                          });
+                      
+                          if (!response.ok) {
+                            throw new Error(`Error while processing Authentication Data with Status:  ${response.status}`);
+                          }
+                      
+                        
+                          
+            
+                        } catch (error) {
+                          console.error("Error while sending Authenication Post request:", error);
+                        }
+                      };
+                      patchChatHistoryData();
+
+
+
                     abl_icon_msg.classList.remove("fa-stop")
                     abl_icon_msg.classList.add("fa-arrow-up")
                     streaming = false;

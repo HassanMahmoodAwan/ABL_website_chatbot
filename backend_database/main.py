@@ -82,25 +82,6 @@ async def delete_record(category_name:str, db: db_dependency):
 
 # ======== ABL ChatHistory Endpoints ==========
 
-
-
-# @app.post("/api/add_chathistory")
-# def add_chathistory(userName: str, user_cnic: int, chat_history: list[dict], db: db_dependency):
-#     new_record = models.ABLMuawin_Authentication_Table(
-#         userName=userName,
-#         user_cnic=user_cnic,
-#         chat_history=chat_history
-#     )
-#     db.add(new_record)
-#     db.commit()
-#     db.refresh(new_record)
-    
-#     return {
-#         "status": "commited in DB",
-#         "message": "Record added successfully",
-#         "id": new_record.id,
-#         "data": new_record
-#     }
 @app.post("/api/add_chathistory")
 def add_chathistory(data:dict, db: db_dependency):
     
@@ -108,7 +89,7 @@ def add_chathistory(data:dict, db: db_dependency):
     user_cnic = data.get("user_cnic")
     chat_history = data.get("chat_history")
     
-    new_record = models.ABLMuawin_Authentication_Table(
+    new_record = models.ABLMuawin_Chatbot_Authentication_Table(
         userName=userName,
         user_cnic=user_cnic,
         chat_history=chat_history
@@ -124,40 +105,7 @@ def add_chathistory(data:dict, db: db_dependency):
         "data": new_record
     }
 
-
-
-# @app.patch("/api/update_chathistory")
-# async def update_chathistory(id: int, userName: str, user_cnic: int, new_entry: dict, db: db_dependency):
-#     try:
-#         # Query the record by id, userName, and user_cnic
-#         record = db.query(models.ABLMuawin_Authentication_Table).filter(
-#             models.ABLMuawin_Authentication_Table.id == id,
-#             models.ABLMuawin_Authentication_Table.userName == userName,
-#             models.ABLMuawin_Authentication_Table.user_cnic == user_cnic
-#         ).first()
         
-#         if not record:
-#             raise HTTPException(status_code=404, detail="Record not found")
-        
-#         print(record.chat_history)
-#         print(new_entry)
-#         # Append new entry to chat_history
-#         if record.chat_history  == [{}]:
-#             print("check None")
-#             record.chat_history = [new_entry]
-#         else:
-#             print("Its working")
-#             record.chat_history.append(new_entry)
-        
-#         db.commit()
-#         # db.refresh(record)
-        
-#         return {"status": "success", "message": "Chat history updated successfully", "data": record.chat_history}
-    
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-    
-    
     
 @app.patch("/api/update_chathistory")
 async def update_chathistory(data:list[dict], db: db_dependency):
@@ -169,10 +117,10 @@ async def update_chathistory(data:list[dict], db: db_dependency):
         user_cnic = data[0]["user_cnic"]
         
         # Query the record by id, userName, and user_cnic
-        record = db.query(models.ABLMuawin_Authentication_Table).filter(
-            models.ABLMuawin_Authentication_Table.id == id,
-            models.ABLMuawin_Authentication_Table.userName == userName,
-            models.ABLMuawin_Authentication_Table.user_cnic == user_cnic
+        record = db.query(models.ABLMuawin_Chatbot_Authentication_Table).filter(
+            models.ABLMuawin_Chatbot_Authentication_Table.id == id,
+            models.ABLMuawin_Chatbot_Authentication_Table.userName == userName,
+            models.ABLMuawin_Chatbot_Authentication_Table.user_cnic == user_cnic
         ).first()
         
         if not record:
@@ -202,7 +150,7 @@ async def update_chathistory(data:list[dict], db: db_dependency):
 @app.get("/api/get_allchathistory")
 async def get_all_records(db: db_dependency):
     try:
-        data = db.query(models.ABLMuawin_Authentication_Table).all()
+        data = db.query(models.ABLMuawin_Chatbot_Authentication_Table).all()
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -211,7 +159,7 @@ async def get_all_records(db: db_dependency):
     
 @app.delete("/api/delete_chathistory")
 async def delete_record(record_id:int, db: db_dependency):
-    db_table = models.ABLMuawin_Authentication_Table
+    db_table = models.ABLMuawin_Chatbot_Authentication_Table
     try:
         data = db.query(db_table).filter(db_table.id == record_id).first()
         if not data:
