@@ -4,6 +4,7 @@ window.onload = ()=>{
     let chat_id;
     let Question;
     let answer;
+    let responseMsg;
 
     // const suggestedQuestions = {
     //     "products info": [", does it offer online shopping?", " does it provide Virtual Debit Card?", ", What features it offers?", ", How to get out Account Statement."],
@@ -39,7 +40,16 @@ window.onload = ()=>{
                 // Attach click event listener to the group
                 divElement.addEventListener("click", () => {
                     const msgText = each.category_name.trim();
-                    inputField_startTemplate.value = msgText;
+                    if (inputField_startTemplate.value == ""){
+                        inputField_startTemplate.placeholder = msgText;
+                        style = document.createElement('style');
+                        style.innerHTML = `
+                         #InputMessage_startTemplate::placeholder{
+                            font-style: italic;
+                        }`
+                        document.head.appendChild(style);
+                    }
+                    
                     inputField_startTemplate.focus();
     
                     const questions = suggestedQuestions[msgText.toLowerCase()];
@@ -58,6 +68,13 @@ window.onload = ()=>{
                             // Question Click handler
                             questionDiv.addEventListener("click", () => {
                                 const msgText = questionDiv.textContent.trim();
+                                inputField_startTemplate.placeholder = "Ask ABL Muawin . . .";
+                                style = document.createElement('style');
+                                style.innerHTML = `
+                                 #InputMessage_startTemplate::placeholder{
+                                    font-style: normal;
+                                }`
+                                document.head.appendChild(style);
     
                                 inputField_startTemplate.value = null;
                                 inputValue = msgText
@@ -217,9 +234,18 @@ window.onload = ()=>{
 
 
     // ***************** Starter Theme of ABL Muawin *******************
-
     inputField_startTemplate.addEventListener("input", (event)=>{
         inputValue = event.target.value;
+
+        if (inputValue){
+            style = document.createElement('style');
+            style.innerHTML = `
+             #InputMessage_startTemplate::placeholder{
+                font-style: normal;
+            }`
+            document.head.appendChild(style);
+            inputField_startTemplate.placeholder = "Ask ABL Muawin . . .";   
+        }
 
         if (Object.keys(suggestedQuestions).includes(inputValue.toLowerCase())){
             sugGroupList.style.display =  "none"
@@ -229,7 +255,22 @@ window.onload = ()=>{
             questions.forEach((question)=>{
             divElement =  document.createElement('div')
             divElement.className = "suggestedQuestion"
-            divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
+            // divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
+            divElement.innerHTML = `${question}`
+            divElement.addEventListener("click", () => {
+                text = divElement.textContent.trim();
+                inputField_startTemplate.value = null;
+                inputValue = text
+                widgetStartTemplate.style.display = "none";
+                widget_mainTemplate.style.display = "block";
+                refresh_btn.style.display = "block";
+
+                sugGroupList.style.display = "flex";
+                sugQuestionsElement.style.display = "none";
+                sugQuestionsElement.innerHTML = ""; 
+
+                onSendingMsg();
+            });
             sugQuestionsElement.appendChild(divElement)
         })
         }else {
@@ -422,17 +463,14 @@ window.onload = ()=>{
     
     //let apiUrl = getStreamUrlFromFile('URL.txt')
     //console.log(apiUrl);
-    
     const inputField = document.getElementById('userInput');
     inputField.addEventListener('input', function(event) {
             inputValue = event.target.value; 
     });
     inputField.addEventListener('keydown', function(event) {
 
-        if (event.key === 'Enter' && !abl_icon_msg.classList.contains("fa-stop")) { 
-            
+        if (event.key === 'Enter' && !abl_icon_msg.classList.contains("fa-stop")) {             
             onSendingMsg()
-
         }
     });
     const msg_send = document.getElementById("msg_icon");
@@ -443,7 +481,19 @@ window.onload = ()=>{
         }else{
             // Handle the Stop Streaming Response.
             streaming = false;
-            console.log("steaming: "+ streaming);
+            console.log(responseMsg)
+            if (responseMsg.innerHTML.trim() ==  `        <div class="chatbot-message">
+            <span class="wait-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </span>
+        </div>`.trim()){
+                    responseMsg.innerHTML = null;
+                    responseMsg.classList.remove("ABLMuawin_responseMsg");
+            }
+
+
             abl_icon_msg.classList.remove("fa-stop")
             abl_icon_msg.classList.add("fa-arrow-up")
         }
@@ -527,10 +577,10 @@ window.onload = ()=>{
         messageElement.style.width = "100%"
         messageElement.style.display = "flex"
         messageElement.style.justifyContent = "start"
-        const textElement = document.createElement("div");
-        textElement.className = 'ABLMuawin_responseMsg';
+        responseMsg = document.createElement("div");
+        responseMsg.className = 'ABLMuawin_responseMsg';
         // textElement.style.display = "none";
-        textElement.innerHTML = `
+        responseMsg.innerHTML = `
         <div class="chatbot-message">
             <span class="wait-dots">
               <span class="dot"></span>
@@ -540,7 +590,7 @@ window.onload = ()=>{
         </div>
         `;
     
-        messageElement.appendChild(textElement);
+        messageElement.appendChild(responseMsg);
     
         chatContainer.appendChild(messageElement);
     
@@ -555,9 +605,9 @@ window.onload = ()=>{
         messageElement.style.width = "100%"
         messageElement.style.display = "flex"
         messageElement.style.justifyContent = "start"
-        const textElement = document.createElement("div");
-        textElement.className = 'ABLMuawin_errorMsg';
-        textElement.innerHTML = `
+        responseMsg = document.createElement("div");
+        responseMsg.className = 'ABLMuawin_errorMsg';
+        responseMsg.innerHTML = `
         <div class="chatbot-message">
             <span class="wait-dots">
               <span class="dot"></span>
@@ -567,7 +617,7 @@ window.onload = ()=>{
         </div>
         `;
     
-        messageElement.appendChild(textElement);
+        messageElement.appendChild(responseMsg);
     
         chatContainer.appendChild(messageElement);
     
