@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <!-- Include CSS files -->
+    <link rel="stylesheet" href="./ablmuawin_style.css">
+</head>
+<body>
+    <!-- ABL muawin -->
+
+
+	 <!-- Authentication Widget -->
+	<div id="ablmuawin_authentication_widget" style="position: fixed; right: 49px; width: 380px; height: 35%; background-color: white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; z-index: 100; transition: bottom 0.6s ease-in-out; overflow: hidden;  ">
+	
+		<!-- Heading -->
+		<div style="height:19% !important; display:flex; justify-content: space-between; padding: 0px 12px;">
+			<div style="display: flex; align-items:center;">
+				<img src="./favicon.png" alt="Logo" srcset="" style="padding-right: 5px; font-size:small; width:34px; height: 30px;">
+				<div style="font-weight:bold; font-family:Poppins !important; "> <span>ABL</span> معاون</div>
+			</div>
+
+			<div id="ablmuawin_authentication_close" style="cursor: pointer; display:flex; gap:14px; align-items:center;">
+				<i class="fa-solid fa-xmark" style="font-size: large; cursor:pointer; font-weight:bold; padding:2.5px 5px; border-radius:2px;" ></i>
+			</div>
+		</div>	
+		<hr style="padding: 0; margin: 0;">
+
+
+		<!-- Authentication Input Fields  -->
+		<div style="width: 100%; height:58%; display:flex; flex-direction:column; justify-content:center; padding: 5px 16px; padding-top: 30px; padding-bottom:0; gap:10px; font-family:Verdana, Geneva, Tahoma, sans-serif;">
+			<div style="display: flex; justify-content:space-between; ">
+				<p style="margin:0; padding:0; padding-top:6px; font-size:small; font-weight:bold;"> Name <span style="color:red;">*</span></p>
+				<div style="margin-left:5px; width:65%;">
+				<input type="text" placeholder="Required" id="authentication_fullName"  style=" padding:4px 5px; font-size:small; width:100%;" required autocomplete="off">
+				<p id="name_authentication_error_msg" style="color: red; font-size:x-small; padding:0; margin:0; visibility:hidden;">Name format is invalid.</p>
+				</div>
+			</div>
+
+			<div>
+			<div style="display: flex; justify-content:space-between;">
+				<p style="margin:0; padding:0; padding-top:4px; font-size:small; font-weight:bold;">CNIC Number <span style="color:red;">*</span></p>
+				<div style="margin-left:5px; width:65%;">
+				<input type="text" placeholder="3520264123821" id="authentication_CNIC"  style=" padding:4px 5px; font-size:small; width:100%;" required autocomplete="off">
+				<p id="cnic_authentication_error_msg" style="color: red; font-size:x-small; padding:0; margin:0; visibility:hidden;">CNIC format is Invalid!</p>
+				</div>
+			</div>	
+			</div>
+		</div>
+
+		<!-- Start Chat Button -->
+		 <div style="width: 100%; height:23%; padding: 0 22px; display:flex; justify-content:end; align-items:center;">
+			<button id="ablmuawin_widget_open_btn" style="padding: 3px 12px; background-color:#4873D7; color:white; font-size:small; border-radius: 2px; border: 1px solid #4873D7; display:flex; align-items:center; gap:4px;">
+				Start Chat
+				<i class="material-icons" style="font-size: 13.5px; font-weight:bold; text-align:center;  ">arrow_forward</i>
+			</button>
+		 </div>
+	</div>
+	 <!-- ======== Authentication Done ========= -->
+
+	<div id="ABLMuawin_widget">
+		
+		<!-- ====== heading ====== -->
+		<div id="widgetHeading" style="padding: 0; margin:0; display:flex; justify-content: space-between; align-items:center; text-align:center; padding: 0 15px; width: 100%; height: 8.2%; font-size: large; font-family:Verdana, Geneva, Tahoma, sans-serif; font-weight: bold;">
+
+			<div id="ABLLogo" style="display: flex; align-items:center; gap:6px;">
+				<img src="./favicon.png" alt="Logo" srcset="" style=" font-size:small; width:34px; height: 30px;">
+				<div style="padding-right: 10px; font-weight:bolder;"> <span>ABL</span> معاون</div>
+				
+				<i id="AblMuawin_refresh" class="fa-solid fa-arrows-rotate" style="font-size:15px; font-weight:bold; text-align:center; position:relative; top:2px; padding:0;margin:0;display:none;"></i>
+
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+				id="AblMuawin_refresh"
+				style="text-align:center; position:relative; top:2px; padding:0;margin:0; width:16px; height:16px; cursor:pointer; display:none;"
+				
+				><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+				
+			</div>
+			
+			<!-- Expand and Close -->
+			<div  style="cursor: pointer; display:flex; gap:3px; align-items:center;">
+				<i id="ablMuawin_Expand_Widget" class="fa-regular fa-square" style="font-size: small; cursor:pointer; padding:4px 6px; padding-top: 5px;border-radius:2px; text-align:center;"></i>
+				
+				<i id="ablmuawin_close" class="fa-solid fa-xmark" style="font-size: large; cursor:pointer; font-weight:bold; padding:2.5px 5px; border-radius:2px;" ></i>
+			</div>
+			<!-- Expand and close -->
+		</div>
+		<hr style="padding: 0; margin: 0;">
+		<!-- ===== Heading Done ===== -->
+
+		<!-- ====== Widget Start Template ====== -->
+		<div id="ABLMuawin_startTemplate" style="width: 100%; height: 91.8%;  display:flex; justify-content:center;  text-align:center; padding: 8px 12px;">
+			<div style="position:relative; top: 20%; width: 100%; height:70%; display:flex; flex-direction:column; align-items:center; gap:20px;">
+				<h1 style="font-size:xx-large; color:rgb(91, 91, 91); padding: 0; margin:0; margin-bottom:14px; ">What can I help with?</h1>
+				
+				
+				<div id="startTemplate_inputField" style="display: flex; flex-direction:column;  width:89%; gap:3px; background-color:rgb(248, 248, 248); border-radius: 10px;">
+					<div style="display: flex; align-items: center; justify-content:center; width:100%;">
+						<input type="text" placeholder="Ask ABL Muawin . . ." id="InputMessage_startTemplate"  
+						style="width:100%; height: 40px; padding:14px 12px; font-size:medium; border:none; background-color:rgb(248, 248, 248);  border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 0; border-bottom-right-radius: 0;" autocomplete="off">
+
+						<div style="height: 40px; padding:14px 8px; padding-left:2px; font-size:medium; border:none; 
+						display:flex; align-items:center; justify-content:center;
+						background-color:rgb(248, 248, 248); 
+						border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-top-left-radius: 0; 	border-bottom-left-radius: 0;
+						">
+							<div id="msg_sending_btn" style="height: 28px; width: 28px; background-color:white; border-radius:50%; display:flex; z-index:500; align-items:center; justify-content:center; cursor:pointer; ">
+								<i class="fa-solid fa-arrow-up" style="font-size: small; cursor:pointer; "></i>
+							</div>
+						</div>	
+					</div>
+					
+					
+					<div id="suggestedQuestions" style="display: none; flex-direction:column; gap: 10px; width:100%; font-size: 13px; color:rgb(58, 58, 58); font-family: Poppins, sans-serif; padding:0px 12px; margin-bottom:10px;">
+					</div>
+				</div>
+				
+				
+
+				<div id="suggestionsGroupList" style="width:83%; display:flex; flex-wrap:wrap; justify-content:center; font-size:small; color: rgb(113, 113, 113);">		
+				</div>
+
+				<!-- SUGGESTED Questions -->
+				
+				
+			
+				
+			</div>
+			<div style="width: 100%; position:absolute; bottom:3px; font-size:12.5px; color:rgb(113, 113, 113); padding: 0; margin:0; font-family:Poppins, sans-serif;">
+				ABL <span style="font-weight: bold; color:#000; font-size:14px; padding-right: 4px;"> معاون </span>can make Mistakes. Check important info.
+			</div>
+			
+		</div>
+		<!-- ====== End of Widget Start Template ====== -->
+
+		<!-- ABL Muawin MainTemplate -->
+		<div id="ABLMuawin_mainTemplate" style="width: 100%; height: 91.8%; display:none; ">
+			<div id="ABLMuawin_body" style="width:100%; height: 82.5%; padding: 5px 16px; overflow-y: auto; font-size: 17px;">
+				<div style=" width:100%; display:flex; justify-content:start">					
+				</div>
+			</div>
+	
+			<!-- ********* MSG INPUT *********** -->
+			<div id="ABLMuawin_msg" style="width:100%; height: 9%; display:flex;  align-items:end;">
+				
+				<!-- <div style="width: 100%; height: 75%; display: flex; padding: 0px 12px; justify-content: space-between ">
+					<input type="text" placeholder="Ask ABL Muawin ..." id="userInput"  style="width: 100%; margin-right:10px; padding:14px 5px; font-size:medium;" autocomplete="off">
+					
+				 	<div id="msg_icon" style="background-color:#edf3fc; border-radius:7%; padding: 9px 10px; display:flex; justify-content:center; align-items:center; cursor:pointer;">		 
+						<i id="icon_msg" class="fa-solid fa-arrow-up" style="font-size: medium; font-weight:bold; color:rgb(0,45,112);"></i>
+				 	</div>
+				</div>	  -->
+				<div style="display: flex; align-items: center; justify-content:center; width:100%; padding: 0px 12px;">
+					<input type="text" placeholder="Ask ABL Muawin . . ." id="userInput"  
+					style="width:100%; height: 40px; padding:14px 12px; font-size:medium; border:none; background-color:rgb(248, 248, 248);  border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 0; border-bottom-right-radius: 0;" autocomplete="off">
+
+					<div style="height: 40px; padding:14px 8px; padding-left:2px; font-size:medium; border:none; 
+					display:flex; align-items:center; justify-content:center;
+					background-color:rgb(248, 248, 248); 
+					border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-top-left-radius: 0; 	border-bottom-left-radius: 0;
+					">
+						<div id="msg_icon" style="height: 28px; width: 28px; background-color:white; border-radius:50%; display:flex; z-index:500; align-items:center; justify-content:center; cursor:pointer; ">
+							<i id="icon_msg" class="fa-solid fa-arrow-up" style="font-size: small; cursor:pointer; "></i>
+						</div>
+					</div>	
+				</div>
+			</div>
+			<!-- ======================== -->
+
+			<!-- ********** Live Chat ********** -->
+			<div id="ABLMuawin_switch" style="height: 7.5%; width:100%; display:flex; align-items:center; padding: 0 16px;">
+				<div id="livechat_switch_btn" style="padding: 2.5px 10px; display:flex; gap:4px; font-size: 11.5px !important; font-weight:600; font-family:Verdana, Geneva, Tahoma, sans-serif; color:#052879; "> <span>Live Chat</span>
+					<i class="material-icons" style="font-size: 14px; font-weight:bold; text-align:center; position:relative; top:3.3px;">arrow_forward</i>
+				</div>
+			</div>
+			<!-- ================================== -->
+
+		</div>
+	</div>
+    
+    
+
+
+    <script src="./ablmuawin_script.js"></script>
+</body>
+</html>

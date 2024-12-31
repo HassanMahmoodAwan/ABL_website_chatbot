@@ -5,7 +5,7 @@ window.onload = ()=>{
     let Question;
     let Answer;
     let responseMsg;
-
+    let inputValue;
 
     let sugGroupList = document.getElementById("suggestionsGroupList")
     async function getSuggestionGroupsEarly() {
@@ -18,6 +18,10 @@ window.onload = ()=>{
             }
 
             suggestion_data = await response.json();
+            if (suggestion_data.length > 5){
+                const shuffledGroups = suggestion_data.sort(() => Math.random() - 0.5);
+                suggestion_data = shuffledGroups.slice(0, 5);
+            }
             suggestion_data.forEach((each) => {
                 suggestedQuestions[each.category_name.toLowerCase()] = each.questions;
 
@@ -44,12 +48,24 @@ window.onload = ()=>{
                     
                     inputField_startTemplate.focus();
     
-                    const questions = suggestedQuestions[msgText.toLowerCase()];
+                    let questions = suggestedQuestions[msgText.toLowerCase()];
                     if (questions) {
                         sugGroupList.style.display = "none";
                         sugQuestionsElement.style.display = "flex";
     
                         sugQuestionsElement.innerHTML = "";
+
+                        const lineSeparater = document.createElement("div")
+                        lineSeparater.style.height = "1.2px"; 
+                        lineSeparater.style.backgroundColor = "rgb(217, 217, 217)"; 
+                        lineSeparater.style.padding = "0px 10px;"
+                        lineSeparater.style.marginBottom = "6px"; 
+                        sugQuestionsElement.appendChild(lineSeparater)
+
+                        if (questions.length > 4){
+                            const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+                            questions = shuffledQuestions.slice(0, 4);
+                        }
                         questions.forEach((question) => {
                             const questionDiv = document.createElement('div');
                             questionDiv.className = "suggestedQuestion";
@@ -57,7 +73,6 @@ window.onload = ()=>{
                             questionDiv.innerHTML = `${question}`;
                             sugQuestionsElement.appendChild(questionDiv);
     
-                            // Question Click handler
                             questionDiv.addEventListener("click", () => {
                                 const msgText = questionDiv.textContent.trim();
                                 inputField_startTemplate.placeholder = "Ask ABL Muawin . . .";
@@ -243,11 +258,10 @@ window.onload = ()=>{
                 if (popup) {
                   if (window.innerWidth < 620) {
                     popup.style.width = "90%";
-                    popup.style.right = "5%"; // Center-align horizontally
-                    popup.style.top = "8%"; // Center-align vertically
-                  } else {
+                    popup.style.right = "5%"; 
+                    popup.style.top = "8%"; 
                     popup.style.width = "60%";
-                    popup.style.right = "20%"; // Restore the original alignment
+                    popup.style.right = "20%"; 
                   }
                 }
               }
@@ -264,6 +278,29 @@ window.onload = ()=>{
 
 
     // ***************** Starter Theme of ABL Muawin *******************
+    widgetStartTemplate.addEventListener("click", (event) => {
+        console.log("Hello");
+        if (!sugQuestionsElement.contains(event.target) && !sugGroupList.contains(event.target)) {
+            // If the click is outside both elements
+            sugGroupList.style.display = "flex";
+            sugQuestionsElement.style.display = "none";
+            inputField_startTemplate.placeholder = "Ask ABL Muawin . . ."; 
+            style = document.createElement('style');
+            style.innerHTML = `
+             #InputMessage_startTemplate::placeholder{
+                font-style: normal;
+            }`
+            document.head.appendChild(style); 
+        }
+    });
+    
+    // Optional: Prevent clicks inside sugGroupList from bubbling to widgetStartTemplate
+    sugGroupList.addEventListener("click", (event) => {
+        event.stopPropagation();
+    });
+    
+
+
     inputField_startTemplate.addEventListener("input", (event)=>{
         inputValue = event.target.value;
 
@@ -341,7 +378,12 @@ window.onload = ()=>{
     }
    
     window.addEventListener("resize", ()=>{
-        if (window.innerWidth <= 900 && window.innerWidth >= 561){
+        if (window.innerWidth < 1080 && window.innerWidth >= 980){
+            ablmuawin_widget.style.height = "81%";
+            ablmuawin_widget.style.width = "93%";
+            inputField_container.style.width = "80%";
+        }
+        else if (window.innerWidth <= 980 && window.innerWidth >= 561){
             ablMuawin_expand_compress.style.display = "none"
             ablmuawin_widget.style.height = "79.2%";
             inputField_container.style.width = "89%";
@@ -443,23 +485,7 @@ window.onload = ()=>{
       });
     // ===============================================
     
-    let inputValue = '';
-    // =============== Dragable Message Handling =================
-    const messages = document.querySelectorAll('.ablMuawin_defined_message');
-    messages.forEach(message => {
-      message.addEventListener('click', () => {
-        console.log(`You clicked: ${message.textContent}`);
-        inputValue = message.textContent; 
-        if (abl_icon_msg.textContent == "send"){
-            onSendingMsg()
-        }
-        // onSendingMsg()
-      });
-    });
-    // ===========================================================
     
-
-
     // ============== MESSAGE ZOOM In and Out ===============
     
     let fSize = 17; 
@@ -470,9 +496,9 @@ window.onload = ()=>{
             console.log(event.deltaY)
 
             if (event.deltaY < 0 && fSize <= 33) {
-                fSize += 2;
+                fSize += 1;
             } else if (event.deltaY > 0 && fSize > 13) {
-                fSize -= 2;
+                fSize -= 1;
             }
             console.log("fontSIze is this: ", fSize)
 
@@ -734,8 +760,56 @@ window.onload = ()=>{
                     counter +=1
                 }
                 if(done){
+                    
+                    Answer = (outputDiv.innerHTML).trim()
 
-                    Answer = outputDiv.innerHTML
+                    if (Answer.toLowerCase() == "can you please rephrase your question?") {
+                        outputDiv.innerHTML += `<div id="call_agent_ui" style="margin-top: 20px; padding: 0px 4px; border-top: 0.5 px solid grey; color:black;">
+                            <hr style="margin:0; padding:0;">
+                            <p style="margin: 0; font-size: 14px; padding: 8px; 0px; color:black;">
+                                <i class="fa-duotone fa-solid fa-circle-exclamation" style="color:red; padding-right: 5px;"></i> 
+                                Unable to find an answer? Would you like to connect with an ABL Live Agent?
+                            </p> 
+                            <div style="display:flex; align-items:center; gap:8px; font-size: 12px;">
+                                <div class="callAgent_btn" style="border: 1.5px solid green; border-radius:6px; padding:2.5px 9px; display:flex; align-items:center; gap: 8px; cursor: pointer;"> 
+                                    <span>Ok, Transfer</span>
+                                    <i class="fa-solid fa-check" style="color: green;"></i>
+                                </div>
+                                <div class="callAgent_cancel_btn" style="border: 1.5px solid red; border-radius:6px; padding:2.5px 8px; display:flex; align-items:center; gap: 8px; cursor: pointer;"> 
+                                    <span>Cancel</span>
+                                    <i class="fa-solid fa-xmark" style="color: red;"></i>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Event delegation
+                    outputDiv.addEventListener("click", (event) => {
+                        const target = event.target;
+                    
+                        // Handle "Ok, Transfer" button
+                        if (target.closest(".callAgent_btn")) {
+                            const callAgentUI = target.closest("#call_agent_ui");
+                            if (callAgentUI) {
+                                callAgentUI.innerHTML = `
+                                    <hr style="margin:0; padding:0;">
+                                    <p style="margin: 0; font-size: 14px; padding: 8px; 0px; color:black;">
+                                        <i class="fa-duotone fa-solid fa-circle-check" style="color:green; padding-right: 6px;"></i>
+                                        Transferring to Live ABL Agent, Please wait. Thanks
+                                    </p>`;
+                            }
+                        }
+                    
+                        // Handle "Cancel" button
+                        if (target.closest(".callAgent_cancel_btn")) {
+                            const callAgentUI = target.closest("#call_agent_ui");
+                            if (callAgentUI) {
+                                callAgentUI.remove();
+                            }
+                        }
+                    });
+                    
+
 
                     const patchChatHistoryData = async () => {
                         posturl = "http://localhost:7000/api/update_chathistory";
@@ -757,9 +831,7 @@ window.onload = ()=>{
                           if (!response.ok) {
                             throw new Error(`Error while processing Authentication Data with Status:  ${response.status}`);
                           }
-                      
-                        
-                          
+                           
             
                         } catch (error) {
                           console.error("Error while sending Authenication Post request:", error);

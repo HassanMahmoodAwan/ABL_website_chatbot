@@ -83,13 +83,14 @@
 }
 .suggestedQuestion:hover{
     border-bottom: 0.25px solid rgb(245, 245, 245);
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(236, 236, 236);
     border-radius:6px;
     
 }
 
 #msg_sending_btn:hover{
-    background-color: rgb(239, 239, 239) !important;
+    /* background-color: rgb(239, 239, 239) !important; */
+    background-color: #d5e3ff !important;
 }
 
 #InputMessage_startTemplate::placeholder{
@@ -106,7 +107,6 @@
 
 #userInput:focus{
     outline: none;
-    border: 2px solid rgb(1, 61, 150);
 }
 
 
@@ -151,7 +151,7 @@
   }
 
 #msg_icon:hover{
-    background-color: #d1ddf5 !important;
+    background-color: #d5e3ff !important;
 }
 
 #livechat_switch_btn{
@@ -225,4 +225,22 @@
       transform: translateY(-8px);
       opacity: 1;
     }
+}
+
+
+
+/* Call Agent Transfer */
+.callAgent_btn:hover{
+    background-color: green;
+    color: white;
+}
+.callAgent_btn:hover i{
+    color: white !important;
+}
+.callAgent_cancel_btn:hover{
+    background-color: red;
+    color: white;
+}
+.callAgent_cancel_btn:hover i{
+    color: white !important;
 }
