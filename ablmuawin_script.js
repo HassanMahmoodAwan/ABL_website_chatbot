@@ -620,7 +620,7 @@ window.onload = ()=>{
     
         // Scroll to the bottom of the chat container
         chatContainer.scrollTop = chatContainer.scrollHeight;
-        return textElement;
+        return responseMsg;
     }
 
     function appendErrorMessage(sender, message) {
@@ -647,7 +647,7 @@ window.onload = ()=>{
     
         // Scroll to the bottom of the chat container
         chatContainer.scrollTop = chatContainer.scrollHeight;
-        return textElement;
+        return responseMsg;
     }
 
     var autoScroll = function () {
@@ -662,7 +662,9 @@ window.onload = ()=>{
     function handleStreamedData(text, outputDiv) {
         const events = text.split("\r\n");
         output = outputDiv
+
         let outputHtml = output.innerHTML;
+        
 
         events.forEach(eventData => {
             var eventComponents = eventData.split(': ');
