@@ -3,17 +3,8 @@ window.onload = ()=>{
     const suggestedQuestions = {};
     let chat_id;
     let Question;
-    let answer;
+    let Answer;
     let responseMsg;
-
-    // const suggestedQuestions = {
-    //     "products info": [", does it offer online shopping?", " does it provide Virtual Debit Card?", ", What features it offers?", ", How to get out Account Statement."],
-    //     "branch/atm details": [", How to find nearest branch?", ", How to find nearest ATM?", ", How to find nearest Cash Deposit Machine?"],
-    //     "discounts": [", How to avail discounts?", ", How to avail discounts on Debit Card?", ", How to avail discounts on Credit Card?"],
-    //     "security": [", How to secure my account?", ", How to secure my account from fraud?", ", How to secure my account from hacking?"],
-    //     "finances": [", How to apply for loan?", ", How to apply for credit card?", ", How to apply for debit card?"],
-    // }
-
 
 
     let sugGroupList = document.getElementById("suggestionsGroupList")
@@ -22,6 +13,7 @@ window.onload = ()=>{
         try {
             response = await fetch(group_url);
             if (!response.ok) {
+                // Handle Error Msg (Handle)
                 throw new Error(`Response status: ${response.status}`);
             }
 
@@ -57,11 +49,11 @@ window.onload = ()=>{
                         sugGroupList.style.display = "none";
                         sugQuestionsElement.style.display = "flex";
     
-                        sugQuestionsElement.innerHTML = ""; // Clear old suggestions
+                        sugQuestionsElement.innerHTML = "";
                         questions.forEach((question) => {
                             const questionDiv = document.createElement('div');
                             questionDiv.className = "suggestedQuestion";
-                            // questionDiv.innerHTML = `<span style="font-weight:bold;">${msgText}</span>${question}`;
+                            
                             questionDiv.innerHTML = `${question}`;
                             sugQuestionsElement.appendChild(questionDiv);
     
@@ -84,7 +76,7 @@ window.onload = ()=>{
     
                                 sugGroupList.style.display = "flex";
                                 sugQuestionsElement.style.display = "none";
-                                sugQuestionsElement.innerHTML = ""; // Clear after sending
+                                sugQuestionsElement.innerHTML = "";
     
                                 onSendingMsg();
                             });
@@ -209,25 +201,63 @@ window.onload = ()=>{
               });
           
               if (!response.ok) {
-                throw new Error(`Error while processing Authentication Data with Status:  ${response.status}`);
+                handleErrorPopup()
               }
           
               result = await response.json();
               chat_id = result.id
 
+              ablmuawin_authentication_widget.style.visibility = "hidden"
+              ablMuawin_authentication_widget.className = "";
+              ablmuawin_widget.style.display = "flex";
+              
+              cnicTag_authentication.value = ""
+              nameTag_authentication.value = ""
+
             } catch (error) {
               console.error("Error while sending Authenication Post request:", error);
+              handleErrorPopup() 
             }
           };
           postAuthenicationData();
 
-                
-        ablmuawin_authentication_widget.style.visibility = "hidden"
-        ablMuawin_authentication_widget.className = "";
-        ablmuawin_widget.style.display = "flex";
         
-        cnicTag_authentication.value = ""
-        nameTag_authentication.value = ""
+        
+        
+        function handleErrorPopup() {
+            const errorPopupHTML = ` <div id="ablmuawin_error_popup" style="position: fixed; right: 20%; top:15%; width: 60%; height: 7%; background-color: red; color:white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content:space-between; align-items:center; z-index: 999999999999999; transition: bottom 2s ease-in-out; overflow: hidden;  text-align:center; border-radius:14px; padding: 0px 20px; font-weight:bold; font-family: Poppins;">
+                <div>ABL Muawin, currently not working.<span style="padding-left: 12px;">Please try again later.</span></div>
+                <i id="abl_muawin_error_popup_close" class="fa-solid fa-xmark" style="font-size: large; cursor:pointer; font-weight:bold; padding:2.5px 5px; border-radius:2px;"></i>
+            </div>`;
+            document.body.insertAdjacentHTML("beforeend", errorPopupHTML);
+
+            let closeButton = document.getElementById("abl_muawin_error_popup_close");
+            closeButton.addEventListener("click", () => {
+              const popup = document.getElementById("ablmuawin_error_popup");
+              if (popup) {
+                popup.remove();
+              }
+            });
+            function adjustPopupWidth() {
+                const popup = document.getElementById("ablmuawin_error_popup");
+                if (popup) {
+                  if (window.innerWidth < 620) {
+                    popup.style.width = "90%";
+                    popup.style.right = "5%"; // Center-align horizontally
+                    popup.style.top = "8%"; // Center-align vertically
+                  } else {
+                    popup.style.width = "60%";
+                    popup.style.right = "20%"; // Restore the original alignment
+                  }
+                }
+              }
+              
+              // Call the function initially and on window resize
+              adjustPopupWidth();
+              window.addEventListener("resize", adjustPopupWidth);
+            console.log("Chatbot is not working Currently ")
+        }
+    
     })
     // =================================================================
 
@@ -255,7 +285,6 @@ window.onload = ()=>{
             questions.forEach((question)=>{
             divElement =  document.createElement('div')
             divElement.className = "suggestedQuestion"
-            // divElement.innerHTML = `<span style="font-weight:bold;">${inputValue}</span>${question}`
             divElement.innerHTML = `${question}`
             divElement.addEventListener("click", () => {
                 text = divElement.textContent.trim();
@@ -321,8 +350,9 @@ window.onload = ()=>{
             ablMuawin_expand_compress.className = "fa-regular fa-square"
         }
         else if (window.innerWidth <= 560){
-            inputField_container.style.width = "96%";
-            sugGroupList.style.width = "92%"
+            ablMuawin_expand_compress.style.display = "none"
+            inputField_container.style.width = "97%";
+            sugGroupList.style.width = "97%"
             ablmuawin_widget.style.width = "430px";
             msgContainer.style.fontSize = "17px";
             ablMuawin_expand_compress.className = "fa-regular fa-square"
@@ -337,7 +367,14 @@ window.onload = ()=>{
          const default_messages = document.getElementsByClassName("ablMuawin_defined_message")  // ?
 
         if (ablMuawin_expand_compress.className == "fa-regular fa-square"){
-            if (window.innerWidth < 980){
+            
+            if (window.innerWidth < 1080 && window.innerWidth >= 980){
+                ablmuawin_widget.style.height = "81%";
+                ablmuawin_widget.style.width = "93%";
+                inputField_container.style.width = "80%";
+            }
+            
+            else if (window.innerWidth < 980){
                 ablmuawin_widget.style.height = "80%";
                 ablmuawin_widget.style.width = "90%";
                 inputField_container.style.width = "80%";
@@ -439,15 +476,6 @@ window.onload = ()=>{
             }
             console.log("fontSIze is this: ", fSize)
 
-            // const userMessages = document.querySelectorAll('.ABLMuawin_userMsg');
-            // const ResponseMessages = document.querySelectorAll('.ABLMuawin_responseMsg');
-
-            // userMessages.forEach(message => {
-            //     message.style.fontSize = `${fSize}px`;
-            // });
-            // ResponseMessages.forEach(message => {
-            //     message.style.fontSize = `${fSize}px`;     
-            // });
             msgContainer.style.fontSize = `${fSize}px`;
 
         }
@@ -460,9 +488,7 @@ window.onload = ()=>{
 
 
     // ********** TRacking user Msg and sending it to backend ***********
-    
-    //let apiUrl = getStreamUrlFromFile('URL.txt')
-    //console.log(apiUrl);
+
     const inputField = document.getElementById('userInput');
     inputField.addEventListener('input', function(event) {
             inputValue = event.target.value; 
@@ -511,8 +537,6 @@ window.onload = ()=>{
         inputField.value = null;
         abl_icon_msg.classList.remove("fa-arrow-up")
         abl_icon_msg.classList.add("fa-stop")
-        // chatHistory["userInput"] = inputValue
-        //chatHistory.push("user", inputValue)
 
         if (inputValue != ""){
             const newMessage = document.createElement('div');
@@ -579,7 +603,7 @@ window.onload = ()=>{
         messageElement.style.justifyContent = "start"
         responseMsg = document.createElement("div");
         responseMsg.className = 'ABLMuawin_responseMsg';
-        // textElement.style.display = "none";
+       
         responseMsg.innerHTML = `
         <div class="chatbot-message">
             <span class="wait-dots">
