@@ -1,4 +1,5 @@
 window.onload = ()=>{
+    
     let suggestion_data;
     const suggestedQuestions = {};
     let chat_id;
@@ -6,6 +7,19 @@ window.onload = ()=>{
     let Answer;
     let responseMsg;
     let inputValue;
+    var chatHistory = [];
+
+    function clearUserChat(){
+        const parentDiv = document.getElementById('ABLMuawin_body');
+        parentDiv.innerHTML = "";
+        chatHistory = [];
+        
+        widgetStartTemplate.style.display = "flex"
+        widget_mainTemplate.style.display = "none"
+        refresh_btn.style.display = "none"
+
+    }
+
 
     let sugGroupList = document.getElementById("suggestionsGroupList")
     async function getSuggestionGroupsEarly() {
@@ -453,41 +467,66 @@ window.onload = ()=>{
 
     
 
-    ablmuawin_close.addEventListener("click", ()=>{
-        ablmuawin_widget.className = "close";
-        // ablmuawin_widget.style.display = 'none';
-        ablmuawin_widget.addEventListener('transitionend', () => {
-            ablmuawin_widget.style.display = 'none';
-            ablmuawin_widget.className = "";
-
-          });
-
-    })
+    ablmuawin_close.addEventListener("click", () => {
+        console.log("Close button clicked");
+    
+        // Create the confirmation dialog dynamically
+        const confirmationDialog = document.createElement("div");
+        confirmationDialog.id = "closeConfirmation";
+        confirmationDialog.style.cssText = `
+            display: block; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.5); 
+            z-index: 9999; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-direction: column;
+        `;
+    
+        // Add the inner content
+        confirmationDialog.innerHTML = `
+            <div style="background: white; border-radius: 4px; display:flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; width: 350px; padding: 10px 0px;">
+                <p style="font-size: 18px; margin: 8px 0;">Are you sure you want to close this chat?</p>
+                <div style="display: flex; justify-content: space-around; padding: 10px 0; width: 55%; font-size: 13px;">
+                    <button id="ablMuawin_confirmClose" style="padding: 4px 10px; background-color: red; color: white; border: none; border-radius: 5px; cursor: pointer;">Yes, Close</button>
+                    <button id="ablMuawin_cancelClose" style="padding: 4px 10px; background-color: gray; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                </div>
+            </div>
+        `;
+    
+        // Append the dialog to the widget
+        ablmuawin_widget.appendChild(confirmationDialog);
+    
+        // Add event listener for "Yes, Close" button
+        document.getElementById("ablMuawin_confirmClose").addEventListener("click", () => {
+            confirmationDialog.remove(); 
+            ablmuawin_widget.className = "close";
+            ablmuawin_widget.addEventListener("transitionend", () => {
+                ablmuawin_widget.style.display = "none";
+                ablmuawin_widget.className = ""; 
+            });
+            clearUserChat();
+        });
+    
+        // Add event listener for "Cancel" button
+        document.getElementById("ablMuawin_cancelClose").addEventListener("click", () => {
+            confirmationDialog.remove(); // Remove the dialog
+        });
+    });
     
 
     
     // =========== ABL Muawin Refresh Chats ==========
-    refresh_btn.addEventListener('click', () => {
-        console.log("In the refreshbtn")
-        const parentDiv = document.getElementById('ABLMuawin_body');
-        
-        const currentDiv = parentDiv.firstElementChild;
-    
-        parentDiv.innerHTML = "";
-        console.log(currentDiv)
-        if (currentDiv) {
-          parentDiv.appendChild(currentDiv);
-        }
-        widgetStartTemplate.style.display = "flex"
-        widget_mainTemplate.style.display = "none"
-        refresh_btn.style.display = "none"
-
-      });
+    refresh_btn.addEventListener('click', clearUserChat);
     // ===============================================
     
     
     // ============== MESSAGE ZOOM In and Out ===============
-    
     let fSize = 17; 
     msgContainer.addEventListener('wheel', (event) => {
         if (event.ctrlKey || event.metaKey) {
@@ -506,7 +545,6 @@ window.onload = ()=>{
 
         }
     });
-
     // ======================================================
 
 
@@ -551,7 +589,7 @@ window.onload = ()=>{
         }
     })
 
-    var chatHistory = [];
+    
 
     function onSendingMsg(){
         if (inputValue == ""){
