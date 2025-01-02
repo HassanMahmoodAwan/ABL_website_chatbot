@@ -2,7 +2,8 @@ window.onload = ()=>{
     
     let suggestion_data;
     const suggestedQuestions = {};
-    let chat_id;
+    let user_id;
+    let session_id;
     let Question;
     let Answer;
     let responseMsg;
@@ -211,13 +212,10 @@ window.onload = ()=>{
         }
 
         const postAuthenicationData = async () => {
-            posturl = "http://localhost:7000/api/add_chathistory";
+            posturl = "http://localhost:7000/api/register_user";
             let data = {
               userName: nameInput_authentication,
-              user_cnic: cnicInput_authentication,
-              chat_history: [
-                {}
-              ]
+              userCnic: cnicInput_authentication,
             };
           
             try {
@@ -234,7 +232,10 @@ window.onload = ()=>{
               }
           
               result = await response.json();
-              chat_id = result.id
+              console.log(result)
+              user_id = result.id
+              session_id = result.sessionId
+              console.log(session_id)
 
               ablmuawin_authentication_widget.style.visibility = "hidden"
               ablMuawin_authentication_widget.className = "";
@@ -850,16 +851,20 @@ window.onload = ()=>{
 
 
                     const patchChatHistoryData = async () => {
-                        posturl = "http://localhost:7000/api/update_chathistory";
+                        posturl = "http://localhost:7000/api/add_chathistory";
 
-                        let data = [
-                            {id: chat_id, userName: nameInput_authentication, user_cnic: cnicInput_authentication}, 
-                            {question: Question, answer: Answer}
-                        ]                                             
+                        let data = {
+                            "userId" : user_id,
+                            "userName": nameInput_authentication,
+                            "userCnic": cnicInput_authentication,
+                            "userSessionId": session_id,
+                            "Question": Question,
+                            "Answer": Answer,   
+                        }                                             
                       
                         try {
                           let response = await fetch(posturl, {
-                            method: "PATCH",
+                            method: "POST",
                             headers: {
                               "Content-Type": "application/json"
                             },
@@ -869,6 +874,8 @@ window.onload = ()=>{
                           if (!response.ok) {
                             throw new Error(`Error while processing Authentication Data with Status:  ${response.status}`);
                           }
+                          result = await response.json();
+                          console.log(result)
                            
             
                         } catch (error) {

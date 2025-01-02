@@ -6,6 +6,7 @@ from database import engine, SessionLocal
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from typing import Annotated, List, Optional
+import time
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -13,7 +14,8 @@ app = FastAPI(docs_url=None, redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],
+    # allow_origins=["http://127.0.0.1:5500"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
@@ -30,22 +32,22 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-@app.post("/api/upload_category")
-def main(db: db_dependency, category_name: str, icon_theme, color_theme,  questions:list[str] = []):
+# @app.post("/api/upload_category")
+# def main(db: db_dependency, category_name: str, icon_theme, color_theme,  questions:list[str] = []):
     
-    print("\nStoring results in Database \n")
-    db_analysis = models.AblMuawin_dataCollection_Table(
-        category_name = category_name.lower(),
-        icon_theme = icon_theme,
-        color_theme = color_theme,
-        questions = questions  
+#     print("\nStoring results in Database \n")
+#     db_analysis = models.AblMuawin_dataCollection_Table(
+#         category_name = category_name.lower(),
+#         icon_theme = icon_theme,
+#         color_theme = color_theme,
+#         questions = questions  
             
-    )
-    db.add(db_analysis)
-    db.commit()
-    db.refresh(db_analysis)
+#     )
+#     db.add(db_analysis)
+#     db.commit()
+#     db.refresh(db_analysis)
        
-    return "Commited in DB"
+#     return "Commited in DB"
 
 
 
@@ -62,113 +64,173 @@ async def get_all_records(db: db_dependency):
     
     
     
-@app.delete("/api/delete_record")
-async def delete_record(category_name:str, db: db_dependency):
-    db_table = models.AblMuawin_dataCollection_Table
-    try:
-        data = db.query(db_table).filter(db_table.category_name == category_name).first()
-        if not data:
-            raise HTTPException(status_code=404, detail="Record not found")
+# @app.delete("/api/delete_record")
+# async def delete_record(category_name:str, db: db_dependency):
+#     db_table = models.AblMuawin_dataCollection_Table
+#     try:
+#         data = db.query(db_table).filter(db_table.category_name == category_name).first()
+#         if not data:
+#             raise HTTPException(status_code=404, detail="Record not found")
         
-        db.delete(data)
-        db.commit()
-        return {"status": "success", "message": "Data deleted successfully"}
+#         db.delete(data)
+#         db.commit()
+#         return {"status": "success", "message": "Data deleted successfully"}
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
     
     
 
 
 # ======== ABL ChatHistory Endpoints ==========
-
-@app.post("/api/add_chathistory")
-def add_chathistory(data:dict, db: db_dependency):
+@app.post("/api/register_user")
+def registerUsers(data:dict, db: db_dependency):
+    db_table = models.ABLMuawin_Chatbot_Users_Table
     
-    userName = data.get("userName")
-    user_cnic = data.get("user_cnic")
-    chat_history = data.get("chat_history")
+    userName = data.get("userName").lower()
+    userCnic = data.get("userCnic")
     
-    new_record = models.ABLMuawin_Chatbot_Authentication_Table(
-        userName=userName,
-        user_cnic=user_cnic,
-        chat_history=chat_history
-    )
-    db.add(new_record)
-    db.commit()
-    db.refresh(new_record)
-    
-    return {
-        "status": "commited in DB",
-        "message": "Record added successfully",
-        "id": new_record.id,
-        "data": new_record
-    }
-
-        
-    
-@app.patch("/api/update_chathistory")
-async def update_chathistory(data:list[dict], db: db_dependency):
-    try:
-        
-        
-        id = data[0]["id"]
-        userName = data[0]["userName"]
-        user_cnic = data[0]["user_cnic"]
-        
-        # Query the record by id, userName, and user_cnic
-        record = db.query(models.ABLMuawin_Chatbot_Authentication_Table).filter(
-            models.ABLMuawin_Chatbot_Authentication_Table.id == id,
-            models.ABLMuawin_Chatbot_Authentication_Table.userName == userName,
-            models.ABLMuawin_Chatbot_Authentication_Table.user_cnic == user_cnic
+    record = db.query(db_table).filter(
+            db_table.user_name == userName,
+            db_table.user_cnic == userCnic
         ).first()
-        
-        if not record:
-            raise HTTPException(status_code=404, detail="Record not found")       
-        
-        print(record)
-        # Append new entry to chat_history
-        if record.chat_history  == [{}]:
-            print("new")
-            record.chat_history = [data[1]]
-        else:
-            record.chat_history.append(data[1])
-            print("append")
-        
+    
+    sessionId = str(int(time.time() * 1000))
+    
+    if record:
+        return {"status": "True",  "id": record.id, "sessionId": sessionId}
+    else:
+        new_record = db_table(
+            user_name=userName,
+            user_cnic=userCnic
+        )
+        db.add(new_record)
         db.commit()
-        # db.refresh(record)
+        db.refresh(new_record)
         
-        return {"status": "success", "message": "Chat history updated successfully", "data": record.chat_history}
+        return {"status": "False", "id": new_record.id, "sessionId": sessionId}
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
-
-@app.get("/api/get_allchathistory")
-async def get_all_records(db: db_dependency):
+    
+    
+@app.post("/api/add_chathistory")
+def addChatHistory(data:dict, db: db_dependency):
     try:
-        data = db.query(models.ABLMuawin_Chatbot_Authentication_Table).all()
-        return data
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    
-    
-@app.delete("/api/delete_chathistory")
-async def delete_record(record_id:int, db: db_dependency):
-    db_table = models.ABLMuawin_Chatbot_Authentication_Table
-    try:
-        data = db.query(db_table).filter(db_table.id == record_id).first()
-        if not data:
-            raise HTTPException(status_code=404, detail="Record not found")
+        db_table = models.ABLMuawin_Chatbot_ChatHistory_Table
         
-        db.delete(data)
+        user_id = data.get("userId")
+        user_name = data.get("userName")
+        user_cnic = data.get("userCnic")
+        user_session_id = data.get("userSessionId")
+        question = data.get("Question")
+        answer = data.get("Answer")
+        
+        new_record = db_table(
+            user_id = user_id,
+            user_name = user_name,
+            user_cnic = user_cnic,
+            user_session_id = user_session_id,
+            question = question,
+            answer = answer
+        )
+        db.add(new_record)
         db.commit()
-        return {"status": "success", "message": "Data deleted successfully"}
-    
+        db.refresh(new_record)
+        
+        return {
+            "status": "commited in DB",
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"status": f"Error while adding Chat: {e}"}
+    
+
+
+# @app.post("/api/add_chathistory")
+# def add_chathistory(data:dict, db: db_dependency):
+    
+#     userName = data.get("userName")
+#     user_cnic = data.get("user_cnic")
+#     chat_history = data.get("chat_history")
+    
+#     new_record = models.ABLMuawin_Chatbot_Authentication_Table(
+#         userName=userName,
+#         user_cnic=user_cnic,
+#         chat_history=chat_history
+#     )
+#     db.add(new_record)
+#     db.commit()
+#     db.refresh(new_record)
+    
+#     return {
+#         "status": "commited in DB",
+#         "message": "Record added successfully",
+#         "id": new_record.id,
+#         "data": new_record
+#     }
+
+        
+    
+# @app.patch("/api/update_chathistory")
+# async def update_chathistory(data:list[dict], db: db_dependency):
+#     try:
+        
+        
+#         id = data[0]["id"]
+#         userName = data[0]["userName"]
+#         user_cnic = data[0]["user_cnic"]
+        
+#         # Query the record by id, userName, and user_cnic
+#         record = db.query(models.ABLMuawin_Chatbot_Authentication_Table).filter(
+#             models.ABLMuawin_Chatbot_Authentication_Table.id == id,
+#             models.ABLMuawin_Chatbot_Authentication_Table.userName == userName,
+#             models.ABLMuawin_Chatbot_Authentication_Table.user_cnic == user_cnic
+#         ).first()
+        
+#         if not record:
+#             raise HTTPException(status_code=404, detail="Record not found")       
+        
+#         print(record)
+#         # Append new entry to chat_history
+#         if record.chat_history  == [{}]:
+#             print("new")
+#             record.chat_history = [data[1]]
+#         else:
+#             record.chat_history.append(data[1])
+#             print("append")
+        
+#         db.commit()
+#         # db.refresh(record)
+        
+#         return {"status": "success", "message": "Chat history updated successfully", "data": record.chat_history}
+    
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
+# @app.get("/api/get_allchathistory")
+# async def get_all_records(db: db_dependency):
+#     try:
+#         data = db.query(models.ABLMuawin_Chatbot_Authentication_Table).all()
+#         return data
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    
+# @app.delete("/api/delete_chathistory")
+# async def delete_record(record_id:int, db: db_dependency):
+#     db_table = models.ABLMuawin_Chatbot_Authentication_Table
+#     try:
+#         data = db.query(db_table).filter(db_table.id == record_id).first()
+#         if not data:
+#             raise HTTPException(status_code=404, detail="Record not found")
+        
+#         db.delete(data)
+#         db.commit()
+#         return {"status": "success", "message": "Data deleted successfully"}
+    
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
     
