@@ -1,11 +1,14 @@
 window.onload = ()=>{
     
-    let suggestion_data;
+    let suggestion_group;
     const suggestedQuestions = {};
+
     let user_id;
     let session_id;
+
     let Question;
     let Answer;
+
     let responseMsg;
     let inputValue;
     var chatHistory = [];
@@ -18,7 +21,15 @@ window.onload = ()=>{
         widgetStartTemplate.style.display = "flex"
         widget_mainTemplate.style.display = "none"
         refresh_btn.style.display = "none"
-
+    }
+    function inputField_placeholder(msgText = "", fontstyle="normal"){
+        inputField_startTemplate.placeholder = msgText;
+        style = document.createElement('style');
+        style.innerHTML = `
+         #InputMessage_startTemplate::placeholder{
+            font-style: ${fontstyle};
+        }`
+        document.head.appendChild(style);
     }
 
 
@@ -28,19 +39,18 @@ window.onload = ()=>{
         try {
             response = await fetch(group_url);
             if (!response.ok) {
-                // Handle Error Msg (Handle)
                 throw new Error(`Response status: ${response.status}`);
             }
 
-            suggestion_data = await response.json();
-            if (suggestion_data.length > 5){
-                const shuffledGroups = suggestion_data.sort(() => Math.random() - 0.5);
-                suggestion_data = shuffledGroups.slice(0, 5);
+            suggestion_group = await response.json();
+            if (suggestion_group.length > 5){
+                const shuffledGroups = suggestion_group.sort(() => Math.random() - 0.5);
+                suggestion_group = shuffledGroups.slice(0, 5);
             }
-            suggestion_data.forEach((each) => {
+            suggestion_group.forEach((each) => {
                 suggestedQuestions[each.category_name.toLowerCase()] = each.questions;
 
-                // Create suggested group
+                // Suggested Group UI
                 const divElement = document.createElement('div');
                 divElement.className = "suggestion_group";
                 divElement.innerHTML = `
@@ -52,15 +62,8 @@ window.onload = ()=>{
                 divElement.addEventListener("click", () => {
                     const msgText = each.category_name.trim();
                     if (inputField_startTemplate.value == ""){
-                        inputField_startTemplate.placeholder = msgText;
-                        style = document.createElement('style');
-                        style.innerHTML = `
-                         #InputMessage_startTemplate::placeholder{
-                            font-style: italic;
-                        }`
-                        document.head.appendChild(style);
+                        inputField_placeholder(msgText, "italic")
                     }
-                    
                     inputField_startTemplate.focus();
     
                     let questions = suggestedQuestions[msgText.toLowerCase()];
@@ -71,10 +74,7 @@ window.onload = ()=>{
                         sugQuestionsElement.innerHTML = "";
 
                         const lineSeparater = document.createElement("div")
-                        lineSeparater.style.height = "1.2px"; 
-                        lineSeparater.style.backgroundColor = "rgb(217, 217, 217)"; 
-                        lineSeparater.style.padding = "0px 10px;"
-                        lineSeparater.style.marginBottom = "6px"; 
+                        lineSeparater.style.cssText = "height: 1.2px; background-color: rgb(217, 217, 217); padding: 0px 10px; marginBottom: 6px;"
                         sugQuestionsElement.appendChild(lineSeparater)
 
                         if (questions.length > 4){
@@ -84,22 +84,14 @@ window.onload = ()=>{
                         questions.forEach((question) => {
                             const questionDiv = document.createElement('div');
                             questionDiv.className = "suggestedQuestion";
-                            
                             questionDiv.innerHTML = `${question}`;
                             sugQuestionsElement.appendChild(questionDiv);
     
                             questionDiv.addEventListener("click", () => {
-                                const msgText = questionDiv.textContent.trim();
-                                inputField_startTemplate.placeholder = "Ask ABL Muawin . . .";
-                                style = document.createElement('style');
-                                style.innerHTML = `
-                                 #InputMessage_startTemplate::placeholder{
-                                    font-style: normal;
-                                }`
-                                document.head.appendChild(style);
-    
+                                inputValue = questionDiv.textContent.trim();
+                                inputField_placeholder("Ask ABL Muawin . . .", "normal")
+
                                 inputField_startTemplate.value = null;
-                                inputValue = msgText
                                 widgetStartTemplate.style.display = "none";
                                 widget_mainTemplate.style.display = "block";
                                 refresh_btn.style.display = "block";
@@ -112,7 +104,7 @@ window.onload = ()=>{
                             });
                         });
                     } else {
-                        console.log("No Questions Found");
+                        console.log("No Questions Found, or Database not Connected.");
                     }
                 });
             });
@@ -173,16 +165,19 @@ window.onload = ()=>{
     // SIDE-BTN Click Handler
     ablmuawin_open.addEventListener("click", ()=>{
         
-        if (ablmuawin_widget.style.display == "none"){
+        if (ablmuawin_widget.style.display == "none" || ablmuawin_widget.style.display == ""){            
             if (nameInput_authentication != "" && cnicInput_authentication != ""){
                 ablmuawin_authentication_widget.style.visibility = "hidden"
                 ablMuawin_authentication_widget.className = "";
                 ablmuawin_widget.style.display = "flex";
             }
             else{
-                ablMuawin_authentication_widget.style.visibility = "visible";}
+                ablMuawin_authentication_widget.style.visibility = "visible";
+                ablMuawin_authentication_widget.className = "show"
+            }
+            
         }
-        ablMuawin_authentication_widget.className = "show"
+       
     })
 
     // CLOSE-BTN click Handler
@@ -553,7 +548,6 @@ window.onload = ()=>{
 
 
     // ********** TRacking user Msg and sending it to backend ***********
-
     const inputField = document.getElementById('userInput');
     inputField.addEventListener('input', function(event) {
             inputValue = event.target.value; 
@@ -820,6 +814,7 @@ window.onload = ()=>{
                                 </div>
                             </div>
                         </div>`;
+                        autoScroll()
                     }
                     
                     // Event delegation
